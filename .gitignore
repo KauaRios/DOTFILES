@@ -22,3 +22,10 @@
 !starship.toml
 !README.md
 !.gitignore
+
+# Aplicativos e Cache
+discord/
+Discord/
+google-chrome/
+BraveSoftware/
+Microsoft/
