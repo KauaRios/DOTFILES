@@ -5,6 +5,9 @@
 **Setup pessoal do Hyprland rodando no CachyOS**  
 *Simples, funcional e agradável aos olhos.*
 
+![Preview](assets/AREA.png)
+
+
 [![CachyOS](https://img.shields.io/badge/OS-CachyOS-blue?style=for-the-badge&logo=archlinux&logoColor=white)](https://cachyos.org/)
 [![Hyprland](https://img.shields.io/badge/WM-Hyprland-58e1ff?style=for-the-badge)](https://hyprland.org/)
 [![Fish](https://img.shields.io/badge/Shell-Fish-4abaff?style=for-the-badge&logo=fish&logoColor=white)](https://fishshell.com/)
