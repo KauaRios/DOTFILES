@@ -3,7 +3,7 @@
 }
 
 window {
-    background-color: #007d6f; /* cachydgreen */
+    background-color: #00137d; /* cachydgreen */
 }
 
 #input {
@@ -38,7 +38,7 @@ window {
 }
 
 #entry:selected {
-    background-color: #00aa84; /* cachymgreen */
+    background-color: #00c3ff; /* cachymgreen */
 }
 
 #text:selected {
