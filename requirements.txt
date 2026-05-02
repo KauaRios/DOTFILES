@@ -1,0 +1,16 @@
+hyprland
+hyprlock
+hyprpaper
+waybar
+wofi
+mako
+wlogout
+kitty
+alacritty
+fish
+starship
+fastfetch
+pipewire
+wireplumber
+brightnessctl
+pavucontrol
