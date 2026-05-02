@@ -1,0 +1,101 @@
+# ╔══════════════════════════════════════════════════════╗
+# ║   starship.toml — Rimuru Tempest · 転生スライム      ║
+# ║   slime king · devour everything · evolve always     ║
+# ╚══════════════════════════════════════════════════════╝
+
+format = """
+[╭─](fg:#0e2a3a)\
+$os\
+$username\
+$directory\
+$git_branch\
+$git_status\
+$python\
+$nodejs\
+$rust\
+$cmd_duration\
+[─╮](fg:#0e2a3a)
+[╰─](fg:#0e2a3a)$character\
+"""
+
+palette = "rimuru"
+
+[palettes.rimuru]
+cyan       = "#38c8e8"
+cyan2      = "#20a0c0"
+cyan_dark  = "#1a6880"
+gold       = "#c8b858"
+gold2      = "#a89840"
+ice        = "#e8f4ff"
+ice2       = "#b8cce8"
+navy       = "#0a0e14"
+deep       = "#0e2a3a"
+teal       = "#1a3040"
+
+# ── OS ───────────────────────────────────────────────────
+[os]
+disabled = false
+format = "[ $symbol ](bg:deep fg:cyan)"
+
+[os.symbols]
+Arch      = "󰣇"
+Ubuntu    = ""
+Debian    = ""
+Fedora    = ""
+NixOS     = ""
+Windows   = ""
+Macos     = ""
+Linux     = ""
+
+# ── Username ─────────────────────────────────────────────
+[username]
+show_always = true
+format = "[  $user ](bg:navy fg:ice2)"
+
+# ── Directory ────────────────────────────────────────────
+[directory]
+format = "[ 󰉋 $path ](bg:deep fg:cyan2)"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " 󰌾"
+read_only_style = "fg:cyan"
+
+# ── Git branch ───────────────────────────────────────────
+[git_branch]
+format = "[ $symbol$branch ](bg:navy fg:gold)"
+symbol = " "
+
+# ── Git status ───────────────────────────────────────────
+[git_status]
+format = "([ $all_status$ahead_behind ](bg:navy fg:cyan))"
+conflicted = "✦"
+ahead      = "⇡${count}"
+behind     = "⇣${count}"
+diverged   = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked  = "?"
+modified   = "~"
+staged     = "+"
+deleted    = "✗"
+
+# ── Python ───────────────────────────────────────────────
+[python]
+format = "[ 󰌠 $version ](bg:deep fg:ice2)"
+
+# ── Node ─────────────────────────────────────────────────
+[nodejs]
+format = "[ 󰎙 $version ](bg:deep fg:ice2)"
+
+# ── Rust ─────────────────────────────────────────────────
+[rust]
+format = "[ 󱘗 $version ](bg:deep fg:ice2)"
+
+# ── Tempo de execução ────────────────────────────────────
+[cmd_duration]
+format = "[ 󱦟 $duration ](fg:teal)"
+min_time = 2_000
+
+# ── Caractere do prompt ──────────────────────────────────
+[character]
+success_symbol = "[✦](bold fg:cyan)"
+error_symbol   = "[✗](bold fg:cyan2)"
+vimcmd_symbol  = "[󰕷](bold fg:gold)"
