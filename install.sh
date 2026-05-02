@@ -1,42 +1,334 @@
 #!/bin/bash
+# ============================================================
+#  DOTFILES INSTALLER — KauaRios/DOTFILES
+#  Suporte: Arch Linux, CachyOS, Fedora, openSUSE Tumbleweed,
+#           Debian, Ubuntu e derivados
+# ============================================================
 
-# Cores para o terminal (estética Catppuccin Mocha)
+set -euo pipefail
+
+# ── Cores ────────────────────────────────────────────────────
 BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${BLUE}Iniciando a instalação do setup do Kauã...${NC}"
+# ── Helpers ──────────────────────────────────────────────────
+info()    { echo -e "${BLUE}[INFO]${NC}  $*"; }
+ok()      { echo -e "${GREEN}[OK]${NC}    $*"; }
+warn()    { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+error()   { echo -e "${RED}[ERRO]${NC}  $*" >&2; exit 1; }
+ask()     { echo -e "${BOLD}$*${NC}"; }
 
-# 1. Instalação das dependências (Prioridade: Yay > Paru > Pacman)
-if command -v yay &> /dev/null; then
-    echo -e "${BLUE}Usando yay...${NC}"
-    yay -S --needed - < requirements.txt
-elif command -v paru &> /dev/null; then
-    echo -e "${BLUE}Usando paru...${NC}"
-    paru -S --needed - < requirements.txt
-else
-    echo -e "${BLUE}Usando pacman...${NC}"
-    sudo pacman -S --needed - < requirements.txt
-fi
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# ── Verificações iniciais ────────────────────────────────────
+check_requirements() {
+    info "Verificando dependências básicas do instalador..."
 
-# 2. Sincronização Dinâmica com a ~/.config
-echo -e "${BLUE}Sincronizando arquivos do repositório com ~/.config...${NC}"
+    for cmd in git curl sudo; do
+        if ! command -v "$cmd" &>/dev/null; then
+            error "Comando '$cmd' não encontrado. Instale-o antes de continuar."
+        fi
+    done
 
-# O loop 'for *' percorre todos os arquivos e pastas na raiz do  repo
-for item in *; do
-    # Lista de exclusão: arquivos que NÃO devem ir para a .config
-    if [[ "$item" == "install.sh" || "$item" == "requirements.txt" || "$item" == "README.md" || "$item" == ".gitignore" || "$item" == "LICENSE" || "$item" == ".git" ]]; then
-        continue
+    if [[ "$XDG_SESSION_TYPE" != "wayland" ]] && [[ -z "${WAYLAND_DISPLAY:-}" ]]; then
+        warn "Sessão Wayland não detectada. Este setup é otimizado para Hyprland/Wayland."
+        ask "Continuar mesmo assim? [s/N]"
+        read -r resp
+        [[ "$resp" =~ ^[Ss]$ ]] || { info "Instalação cancelada."; exit 0; }
     fi
 
-    # Copia o restante (pastas como hypr, kitty, etc. e arquivos como starship.toml)
-    echo -e "Copiando $item para ~/.config/..."
-    cp -rv "$item" ~/.config/
-done
+    ok "Verificações básicas OK."
+}
 
-# 3. Reload do Ambiente
-echo -e "${BLUE}Aplicando configurações...${NC}"
-hyprctl reload
-pkill -USR2 waybar || waybar & 
+# ── Detecção de distro ───────────────────────────────────────
+detect_distro() {
+    if [[ -f /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        source /etc/os-release
+        DISTRO_ID="${ID:-unknown}"
+        DISTRO_LIKE="${ID_LIKE:-}"
+    else
+        error "Não foi possível detectar a distribuição (/etc/os-release não encontrado)."
+    fi
 
-echo -e "${BLUE}Setup concluído! Audio: wpctl set-default 51${NC}"
+    # Normaliza para família
+    if echo "$DISTRO_ID $DISTRO_LIKE" | grep -qiE "arch|cachyos|endeavour|manjaro|garuda"; then
+        DISTRO_FAMILY="arch"
+    elif echo "$DISTRO_ID $DISTRO_LIKE" | grep -qiE "fedora|rhel|centos|nobara"; then
+        DISTRO_FAMILY="fedora"
+    elif echo "$DISTRO_ID $DISTRO_LIKE" | grep -qiE "opensuse|suse"; then
+        DISTRO_FAMILY="opensuse"
+    elif echo "$DISTRO_ID $DISTRO_LIKE" | grep -qiE "debian|ubuntu|mint|pop|elementary|zorin"; then
+        DISTRO_FAMILY="debian"
+    else
+        warn "Distribuição '$DISTRO_ID' não reconhecida explicitamente."
+        DISTRO_FAMILY="unknown"
+    fi
+
+    info "Distro detectada: ${BOLD}$DISTRO_ID${NC} (família: $DISTRO_FAMILY)"
+}
+
+# ── Instalação de pacotes por distro ─────────────────────────
+
+# Pacotes Arch (nomes do AUR/pacman)
+PKGS_ARCH=(
+    hyprland hyprlock hyprpaper
+    waybar wofi mako wlogout
+    kitty alacritty fish starship fastfetch
+    pipewire wireplumber pavucontrol brightnessctl
+    playerctl ttf-fira-sans otf-font-awesome
+)
+
+# Pacotes Fedora (nomes dnf)
+PKGS_FEDORA=(
+    hyprland hyprpaper
+    waybar wofi mako
+    kitty alacritty fish
+    pipewire wireplumber pavucontrol brightnessctl
+    playerctl fira-sans-fonts fontawesome-fonts
+)
+# Nota: hyprlock, wlogout, starship, fastfetch podem precisar de
+# copr ou build manual no Fedora
+
+# Pacotes openSUSE Tumbleweed
+PKGS_OPENSUSE=(
+    hyprland hyprpaper
+    waybar wofi mako
+    kitty alacritty fish
+    pipewire wireplumber pavucontrol brightnessctl
+    playerctl google-fira-fonts
+)
+
+# Pacotes Debian/Ubuntu (via apt — muitos via backports ou PPAs)
+PKGS_DEBIAN=(
+    waybar wofi mako-notifier
+    kitty alacritty fish
+    pipewire wireplumber pavucontrol brightnessctl
+    playerctl fonts-firacode
+)
+# Nota: hyprland no Debian requer build manual ou PPA externo
+
+install_packages() {
+    info "Iniciando instalação de pacotes para família: $DISTRO_FAMILY"
+
+    case "$DISTRO_FAMILY" in
+        arch)
+            # Prefere yay > paru > pacman
+            if command -v yay &>/dev/null; then
+                PKG_MGR="yay"
+                PKG_CMD="yay -S --needed --noconfirm"
+            elif command -v paru &>/dev/null; then
+                PKG_MGR="paru"
+                PKG_CMD="paru -S --needed --noconfirm"
+            else
+                PKG_MGR="pacman"
+                PKG_CMD="sudo pacman -S --needed --noconfirm"
+                warn "yay/paru não encontrados — usando pacman (pacotes AUR serão pulados)."
+            fi
+            info "Gerenciador: $PKG_MGR"
+            $PKG_CMD "${PKGS_ARCH[@]}" || warn "Alguns pacotes falharam — verifique manualmente."
+            ;;
+
+        fedora)
+            info "Instalando via dnf..."
+            # Habilita copr do solopasha para hyprland
+            if ! sudo dnf copr list --enabled 2>/dev/null | grep -q "solopasha/hyprland"; then
+                info "Habilitando COPR solopasha/hyprland..."
+                sudo dnf copr enable -y solopasha/hyprland 2>/dev/null || \
+                    warn "Não foi possível habilitar o COPR. Hyprland pode não ser instalado."
+            fi
+            sudo dnf install -y "${PKGS_FEDORA[@]}" || warn "Alguns pacotes falharam."
+            # Starship via script oficial
+            if ! command -v starship &>/dev/null; then
+                info "Instalando Starship..."
+                curl -sS https://starship.rs/install.sh | sh -s -- -y || warn "Starship falhou."
+            fi
+            # Fastfetch via download direto
+            if ! command -v fastfetch &>/dev/null; then
+                info "Instalando Fastfetch..."
+                FASTFETCH_VER="2.11.4"
+                curl -sLo /tmp/fastfetch.rpm \
+                    "https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VER}/fastfetch-linux-amd64.rpm" && \
+                sudo rpm -i /tmp/fastfetch.rpm || warn "Fastfetch falhou."
+            fi
+            ;;
+
+        opensuse)
+            info "Instalando via zypper..."
+            sudo zypper install -y "${PKGS_OPENSUSE[@]}" || warn "Alguns pacotes falharam."
+            if ! command -v starship &>/dev/null; then
+                curl -sS https://starship.rs/install.sh | sh -s -- -y || warn "Starship falhou."
+            fi
+            ;;
+
+        debian)
+            info "Instalando via apt..."
+            sudo apt-get update -qq
+            sudo apt-get install -y "${PKGS_DEBIAN[@]}" || warn "Alguns pacotes falharam."
+            if ! command -v starship &>/dev/null; then
+                curl -sS https://starship.rs/install.sh | sh -s -- -y || warn "Starship falhou."
+            fi
+            if ! command -v fastfetch &>/dev/null; then
+                FASTFETCH_VER="2.11.4"
+                curl -sLo /tmp/fastfetch.deb \
+                    "https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VER}/fastfetch-linux-amd64.deb" && \
+                sudo dpkg -i /tmp/fastfetch.deb || warn "Fastfetch falhou."
+            fi
+            warn "Hyprland no Debian/Ubuntu requer instalação manual ou PPA externo."
+            warn "Veja: https://github.com/hyprwm/Hyprland"
+            ;;
+
+        *)
+            warn "Distro não suportada automaticamente. Instale os pacotes manualmente."
+            warn "Lista de referência (nomes Arch): ${PKGS_ARCH[*]}"
+            ;;
+    esac
+
+    ok "Pacotes processados."
+}
+
+# ── Backup de configs existentes ─────────────────────────────
+backup_existing() {
+    local backup_dir="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
+    local has_backup=false
+
+    # Arquivos/pastas do repo que vão para ~/.config
+    local exclude=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git" "starship.toml")
+
+    for item in "$REPO_DIR"/*; do
+        local name
+        name="$(basename "$item")"
+
+        # Pula exclusões
+        local skip=false
+        for ex in "${exclude[@]}"; do
+            [[ "$name" == "$ex" ]] && skip=true && break
+        done
+        $skip && continue
+
+        local target="$HOME/.config/$name"
+        if [[ -e "$target" ]]; then
+            if [[ "$has_backup" == false ]]; then
+                mkdir -p "$backup_dir"
+                has_backup=true
+                info "Backup dos configs existentes em: $backup_dir"
+            fi
+            cp -r "$target" "$backup_dir/" && \
+                info "  Backup: ~/.config/$name → $backup_dir/$name"
+        fi
+    done
+
+    $has_backup && ok "Backup concluído." || info "Nenhum config existente para fazer backup."
+}
+
+# ── Sincronização dos dotfiles ───────────────────────────────
+sync_dotfiles() {
+    info "Sincronizando dotfiles para ~/.config/..."
+
+    local exclude=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git")
+
+    mkdir -p "$HOME/.config"
+
+    for item in "$REPO_DIR"/*; do
+        local name
+        name="$(basename "$item")"
+
+        # Pula exclusões
+        local skip=false
+        for ex in "${exclude[@]}"; do
+            [[ "$name" == "$ex" ]] && skip=true && break
+        done
+        $skip && continue
+
+        # starship.toml vai para ~/.config/starship.toml diretamente
+        if [[ "$name" == "starship.toml" ]]; then
+            cp -v "$item" "$HOME/.config/starship.toml"
+            continue
+        fi
+
+        cp -rv "$item" "$HOME/.config/"
+        ok "  Copiado: $name"
+    done
+
+    ok "Sincronização concluída."
+}
+
+# ── Configurações pós-instalação ─────────────────────────────
+post_install() {
+    info "Aplicando configurações pós-instalação..."
+
+    # Define fish como shell padrão se não for
+    if command -v fish &>/dev/null; then
+        local fish_path
+        fish_path="$(command -v fish)"
+        if [[ "$SHELL" != "$fish_path" ]]; then
+            info "Definindo fish como shell padrão..."
+            # Garante que fish está em /etc/shells
+            grep -qF "$fish_path" /etc/shells || echo "$fish_path" | sudo tee -a /etc/shells
+            chsh -s "$fish_path" || warn "Não foi possível definir fish como padrão. Rode: chsh -s $fish_path"
+        fi
+    fi
+
+    # Recarrega Hyprland se estiver rodando
+    if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null 2>&1; then
+        info "Recarregando Hyprland..."
+        hyprctl reload || warn "hyprctl reload falhou."
+    fi
+
+    # Reinicia Waybar
+    if pgrep -x waybar &>/dev/null; then
+        info "Reiniciando Waybar..."
+        pkill waybar || true
+        sleep 0.5
+        waybar &>/dev/null & disown
+    elif command -v waybar &>/dev/null; then
+        info "Iniciando Waybar..."
+        waybar &>/dev/null & disown
+    fi
+
+    ok "Pós-instalação concluída."
+}
+
+# ── Confirmação do usuário ───────────────────────────────────
+confirm() {
+    echo ""
+    echo -e "${BOLD}══════════════════════════════════════════${NC}"
+    echo -e "${BLUE}  DOTFILES INSTALLER — KauaRios${NC}"
+    echo -e "${BOLD}══════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "  Repo:   ${BOLD}$REPO_DIR${NC}"
+    echo -e "  Destino: ${BOLD}~/.config/${NC}"
+    echo -e "  Distro: ${BOLD}${DISTRO_ID:-desconhecida}${NC}"
+    echo ""
+    warn "Configs existentes serão copiados para backup antes de sobrescrever."
+    echo ""
+    ask "Iniciar instalação? [s/N]"
+    read -r resp
+    [[ "$resp" =~ ^[Ss]$ ]] || { info "Instalação cancelada."; exit 0; }
+}
+
+# ── Main ─────────────────────────────────────────────────────
+main() {
+    check_requirements
+    detect_distro
+    confirm
+
+    install_packages
+    backup_existing
+    sync_dotfiles
+    post_install
+
+    echo ""
+    echo -e "${GREEN}${BOLD}══════════════════════════════════════════${NC}"
+    echo -e "${GREEN}${BOLD}  Setup concluído com sucesso!${NC}"
+    echo -e "${GREEN}${BOLD}══════════════════════════════════════════${NC}"
+    echo ""
+    info "Se o áudio não funcionar: ${BOLD}wpctl set-default 51${NC}"
+    info "Reinicie a sessão para aplicar todas as mudanças."
+}
+
+main "$@"
