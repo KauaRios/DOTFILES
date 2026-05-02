@@ -1,0 +1,24 @@
+# 1. Ignora tudo o que é arquivo
+*
+
+# 2. NÃO ignora as pastas (isso permite que o Git entre nelas para procurar arquivos)
+!*/
+
+# 3. Agora sim, as exceções para as pastas que você quer
+!hypr/**
+!waybar/**
+!kitty/**
+!fish/**
+!alacritty/**
+!swaylock/**
+!wlogout/**
+!wofi/**
+!mako/**
+!fastfetch/**
+!btop/**
+!micro/**
+
+# 4. Exceções para arquivos na raiz da .config
+!starship.toml
+!README.md
+!.gitignore

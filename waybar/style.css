@@ -1,0 +1,303 @@
+/* ============================================================
+   WAYBAR — Blue Anime Theme
+   Palette:
+     bg-dark    : rgba(5, 12, 28, 0.88)   — noite profunda
+     border     : rgba(42, 110, 200, 0.20) — azul elétrico suave
+     border-act : rgba(80, 160, 255, 0.55) — azul vivo (ativo)
+     text-main  : #c8e6ff                  — branco frio azulado
+     text-dim   : #8ab4d8                  — azul médio
+     text-accent: #7ab8f5                  — azul claro
+     text-bright: #e8f4ff                  — quase branco
+     warn       : #f08ca0                  — rosa quente (crítico)
+   ============================================================ */
+
+* {
+    font-family: "Fira Sans Semibold", "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 3px;
+    min-height: 0;
+    margin: 0.2em 0.3em;
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.4s;
+}
+
+/* ── Bar ─────────────────────────────────────────────────── */
+#waybar {
+    background-color: transparent;
+    color: #c8e6ff;
+    border-radius: 0;
+    margin: 0;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+/* ── Base style shared by every module ───────────────────── */
+#workspaces,
+#window,
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#network,
+#pulseaudio,
+#wireplumber,
+#custom-media,
+#mode,
+#idle_inhibitor,
+#mpd,
+#bluetooth,
+#custom-hyprPicker,
+#custom-power-menu,
+#custom-spotify,
+#custom-weather,
+#custom-screenshot_t,
+#custom-storage,
+#custom-power,
+#custom-launcher,
+#tray {
+    background-color: rgba(5, 12, 28, 0.88);
+    color: #c8e6ff;
+    border-radius: 14px;
+    padding: 4px 8px;
+    border: 1px solid rgba(42, 110, 200, 0.20);
+}
+
+/* ── Workspaces ──────────────────────────────────────────── */
+#workspaces {
+    padding: 3px 6px;
+}
+
+#workspaces button {
+    padding: 3px 5px;
+    margin: 3px 4px;
+    border-radius: 6px;
+    color: #c8e6ff;
+    background-color: rgba(5, 12, 28, 0.88);
+    border: 1px solid rgba(42, 110, 200, 0.18);
+    font-size: 13px;
+    transition: all 0.3s ease-in-out;
+}
+
+#workspaces button.active {
+    color: #e8f4ff;
+    background: rgba(14, 52, 120, 0.85);
+    border: 1px solid rgba(80, 160, 255, 0.55);
+    box-shadow: 0 0 8px rgba(60, 140, 255, 0.35), inset 0 0 6px rgba(80, 160, 255, 0.12);
+}
+
+#workspaces button:hover {
+    background: rgba(20, 45, 90, 0.85);
+    border: 1px solid rgba(80, 160, 255, 0.35);
+}
+
+#workspaces button.urgent {
+    background-color: rgba(180, 40, 80, 0.85);
+    border: 1px solid rgba(255, 80, 120, 0.5);
+}
+
+/* ── Window title ────────────────────────────────────────── */
+#window {
+    font-size: 15px;
+    font-weight: 800;
+    padding: 3px 8px;
+    margin: 2px;
+}
+
+/* ── Clock ───────────────────────────────────────────────── */
+#clock {
+    color: #c8e6ff;
+}
+
+/* ── Spotify / Media ─────────────────────────────────────── */
+#custom-spotify {
+    color: #7ab8f5;
+    padding: 3px 12px;
+}
+
+/* ── System metrics ──────────────────────────────────────── */
+#temperature {
+    color: #a8c8f0;
+}
+
+#temperature.critical {
+    color: #f08ca0;
+    background-color: rgba(100, 10, 30, 0.85);
+    border-color: rgba(255, 80, 120, 0.45);
+}
+
+#cpu {
+    color: #f08ca0;
+}
+
+#memory {
+    color: #a0c4e8;
+}
+
+#custom-storage {
+    color: #8ecaff;
+}
+
+/* ── Backlight ───────────────────────────────────────────── */
+#backlight {
+    color: #8ecaff;
+}
+
+/* ── Audio ───────────────────────────────────────────────── */
+#pulseaudio {
+    color: #7ab8f5;
+}
+
+#wireplumber {
+    color: #c8e6ff;
+}
+
+/* ── Battery ─────────────────────────────────────────────── */
+#battery {
+    color: #a8c8f0;
+}
+
+#battery.charging,
+#battery.full,
+#battery.plugged {
+    color: #5baee0;
+}
+
+@keyframes blink {
+    to {
+        background-color: rgba(14, 30, 65, 0.7);
+        color: #c8e6ff;
+    }
+}
+
+#battery.critical:not(.charging) {
+    color: #f08ca0;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/* ── Network ─────────────────────────────────────────────── */
+#network {
+    color: #7ab8f5;
+}
+
+#network.disconnected {
+    color: #f08ca0;
+}
+
+/* ── Bluetooth ───────────────────────────────────────────── */
+#bluetooth {
+    color: #5b9de0;
+}
+
+#bluetooth.disconnected {
+    color: #f08ca0;
+}
+
+/* ── Disk ────────────────────────────────────────────────── */
+#disk {
+    color: #8ecaff;
+}
+
+/* ── Power / Screenshot / Launcher ──────────────────────── */
+#custom-power {
+    color: #7ab8f5;
+}
+
+#custom-launcher {
+    color: #5b9de0;
+}
+
+/* ── Weather states ──────────────────────────────────────── */
+#custom-weather.severe          { color: #f08ca0; }
+#custom-weather.sunnyDay        { color: #a8c8f0; }
+#custom-weather.clearNight      { color: #c8e6ff; }
+#custom-weather.cloudyFoggyDay,
+#custom-weather.cloudyFoggyNight { color: #8ab4d8; }
+#custom-weather.rainyDay,
+#custom-weather.rainyNight      { color: #5b9de0; }
+#custom-weather.showyIcyDay,
+#custom-weather.snowyIcyNight   { color: #ddeeff; }
+#custom-weather.default         { color: #a8c8f0; }
+
+/* ── Media (VLC / Spotify pill) ──────────────────────────── */
+#custom-media {
+    min-width: 100px;
+    color: #c8e6ff;
+}
+
+#custom-media.custom-spotify {
+    background-color: rgba(10, 30, 70, 0.85);
+}
+
+#custom-media.custom-vlc {
+    background-color: rgba(30, 50, 90, 0.85);
+    color: #a8c8f0;
+}
+
+/* ── Tray ────────────────────────────────────────────────── */
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: rgba(120, 20, 50, 0.85);
+}
+
+/* ── Idle inhibitor ──────────────────────────────────────── */
+#idle_inhibitor {
+    color: #8ab4d8;
+}
+
+#idle_inhibitor.activated {
+    background-color: rgba(30, 80, 160, 0.85);
+    color: #e8f4ff;
+    border-color: rgba(80, 160, 255, 0.5);
+}
+
+/* ── Language / Keyboard ─────────────────────────────────── */
+#language {
+    color: #7ab8f5;
+    margin: 0 5px;
+    min-width: 16px;
+}
+
+#keyboard-state {
+    color: #c8e6ff;
+    margin: 0 5px;
+    min-width: 16px;
+}
+
+#keyboard-state > label {
+    padding: 0;
+}
+
+#keyboard-state > label.locked {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* ── Focus ───────────────────────────────────────────────── */
+label:focus {
+    background-color: rgba(0, 5, 20, 0.95);
+}
+
+/* ── Edge margin resets ──────────────────────────────────── */
+.modules-left > widget:first-child > #workspaces {
+    margin-left: 0;
+}
+
+.modules-right > widget:last-child > #workspaces {
+    margin-right: 0;
+}
