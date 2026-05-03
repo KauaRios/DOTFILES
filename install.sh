@@ -107,7 +107,8 @@ PKGS_ARCH=(
     ttf-fira-sans              # waybar/style.css
     otf-font-awesome           # waybar/style.css
     ttf-hack-nerd              # wofi/style.css
-    ttf-sarasa-gothic          # mako/config (AUR)
+    ttf-sarasa-gothic
+    imagemagick gnome-themes-extra nwg-look qt5ct qt6ct kvantum xsettingsd
 )
 
 # Pacotes Fedora (nomes dnf)
@@ -124,7 +125,9 @@ PKGS_FEDORA=(
     fira-sans-fonts            # waybar/style.css
     fontawesome-fonts          # waybar/style.css
     hack-fonts                 # wofi/style.css
+    ImageMagick gnome-themes-extra nwg-look qt5ct qt6ct xsettingsd
     # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
+
 )
 
 # Pacotes openSUSE Tumbleweed
@@ -141,6 +144,7 @@ PKGS_OPENSUSE=(
     google-fira-fonts          # waybar/style.css
     fontawesome-fonts          # waybar/style.css
     hack-fonts                 # wofi/style.css
+    ImageMagick gnome-themes-extra nwg-look qt5ct qt6ct xsettingsd
     # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
 )
 
@@ -157,6 +161,7 @@ PKGS_DEBIAN=(
     fonts-firacode             # waybar/style.css (fira)
     fonts-font-awesome         # waybar/style.css
     fonts-hack                 # wofi/style.css
+    imagemagick gnome-themes-extra nwg-look qt5ct qt6ct xsettingsd
     # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
 )
 
@@ -470,14 +475,16 @@ PYFIX
         ok "Permissões dos scripts da waybar aplicadas."
     fi
 
-    # ── Define fish como shell padrão ────────────────────────────────────────
+
+   # ── Define fish como shell padrão ────────────────────────────────────────
     if command -v fish &>/dev/null; then
         local fish_path
         fish_path="$(command -v fish)"
         if [[ "$SHELL" != "$fish_path" ]]; then
             info "Definindo fish como shell padrão..."
             grep -qF "$fish_path" /etc/shells || echo "$fish_path" | sudo tee -a /etc/shells
-            sudo chsh -s "$fish_path" "$USER" || warn "Não foi possível definir fish como padrão. Rode: sudo chsh -s $fish_path $USER"
+            # TROCA: Saída do chsh (interativo) entrada do usermod (não-interativo)
+            sudo usermod -s "$fish_path" "$USER" || warn "Não foi possível definir fish como padrão via usermod."
         fi
     fi
 

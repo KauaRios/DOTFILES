@@ -25,3 +25,8 @@ cantarell-fonts
 ttf-sarasa-gothic
 ttf-fira-sans
 otf-font-awesome
+imagemagick
+gnome-themes-extra
+nwg-look
+qt5ct
+qt6ct

@@ -1,7 +1,7 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
-    "source": "$HOME/.config/fastfetch/assets/jpg.png",
+    "source": "/home/kauadev/.config/fastfetch/assets/jpg.png",
     "type": "auto",
     "padding": {
       "top": 0,
