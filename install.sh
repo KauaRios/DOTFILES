@@ -34,6 +34,11 @@ safe_read() {
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# ── Detecta clone aninhado (DOTFILES/DOTFILES) e corrige o path ──
+if [[ -d "$REPO_DIR/DOTFILES" ]] && [[ -f "$REPO_DIR/DOTFILES/install.sh" ]]; then
+    REPO_DIR="$REPO_DIR/DOTFILES"
+fi
+
 # ── Lista de arquivos/pastas do repo que NÃO vão para ~/.config ──
 # (usada tanto no backup quanto na sincronização)
 EXCLUDE_LIST=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git" "assets")
@@ -170,8 +175,7 @@ install_packages() {
             else
                 warn "yay/paru não encontrados — instalando paru automaticamente..."
                 sudo pacman -S --needed --noconfirm base-devel git || error "Falha ao instalar base-devel/git."
-                if git clone https://aur.archlinux.org/paru.git /tmp/paru-install && \
-                   (cd /tmp/paru-install && makepkg -si --noconfirm); then
+                if git clone https://aur.archlinux.org/paru.git /tmp/paru-install &&                    (cd /tmp/paru-install && makepkg -si --noconfirm); then
                     rm -rf /tmp/paru-install
                     PKG_MGR="paru"
                     PKG_CMD="paru -S --needed --noconfirm"
@@ -402,6 +406,64 @@ post_install() {
         ok "hyprpaper.conf: caminhos expandidos para $HOME"
     fi
 
+    # ── Fix config.fish: guard para cachyos-fish-config ──────────────────────
+    local fish_conf="$HOME/.config/fish/config.fish"
+    if [[ -f "$fish_conf" ]] && grep -q "source /usr/share/cachyos-fish-config" "$fish_conf"; then
+        # Envolve o source em if/end para não quebrar em Arch puro
+        python3 - "$fish_conf" << 'PYFIX'
+import sys
+path = sys.argv[1]
+lines = open(path).readlines()
+out = []
+for line in lines:
+    stripped = line.rstrip()
+    if stripped == "source /usr/share/cachyos-fish-config/cachyos-config.fish":
+        out.append("if test -f /usr/share/cachyos-fish-config/cachyos-config.fish
+")
+        out.append("    source /usr/share/cachyos-fish-config/cachyos-config.fish
+")
+        out.append("end
+")
+    else:
+        out.append(line)
+# Adiciona fallback de fastfetch se não tiver fish_greeting
+text = "".join(out)
+if "fish_greeting" not in text:
+    text += """
+# Greeting: fastfetch em Arch puro (no CachyOS o cachyos-config já faz isso)
+function fish_greeting
+    if not test -f /usr/share/cachyos-fish-config/cachyos-config.fish
+        if command -q fastfetch
+            fastfetch
+        end
+    end
+end
+"""
+open(path, "w").write(text)
+PYFIX
+        ok "config.fish: guard adicionado para cachyos-fish-config."
+    fi
+
+    # ── Instala fisher + plugins de autocomplete ──────────────────────────────
+    if command -v fish &>/dev/null; then
+        info "Instalando fisher e plugins de autocomplete..."
+        # Instala fisher se não existir
+        fish -c "
+            if not functions -q fisher
+                curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+                fisher install jorgebucaran/fisher
+            end
+            fisher install PatrickF1/fzf.fish 2>/dev/null || true
+            fisher install franciscolourenco/done 2>/dev/null || true
+            fisher install jorgebucaran/autopair.fish 2>/dev/null || true
+        " 2>/dev/null || warn "Fisher/plugins: verifique manualmente."
+        ok "fisher e plugins instalados."
+        # fzf é necessário para o fzf.fish funcionar
+        if ! command -v fzf &>/dev/null; then
+            sudo pacman -S --needed --noconfirm fzf 2>/dev/null || true
+        fi
+    fi
+
     # ── Permissões dos scripts da waybar ─────────────────────────────────────
     if [[ -d "$HOME/.config/waybar" ]]; then
         find "$HOME/.config/waybar" -name "*.sh" -o -name "*.py" | xargs chmod +x 2>/dev/null || true
@@ -415,7 +477,7 @@ post_install() {
         if [[ "$SHELL" != "$fish_path" ]]; then
             info "Definindo fish como shell padrão..."
             grep -qF "$fish_path" /etc/shells || echo "$fish_path" | sudo tee -a /etc/shells
-            sudo chsh -s "$fish_path" "$USER" || warn "Não foi possível definir fish como padrão. Rode manualmente: sudo chsh -s $fish_path $USER"
+            sudo chsh -s "$fish_path" "$USER" || warn "Não foi possível definir fish como padrão. Rode: sudo chsh -s $fish_path $USER"
         fi
     fi
 
