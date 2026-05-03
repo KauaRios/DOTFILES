@@ -1,31 +1,21 @@
-# 1. Ignora tudo o que é arquivo
-*
+# ==========================================
+# DOTFILES .gitignore
+# ==========================================
 
-# 2. NÃO ignora as pastas (isso permite que o Git entre nelas para procurar arquivos)
-!*/
+# ── Lixo de Editores e Temporários ──
+*~
+*.swp
+*.swo
+*.tmp
+.cache/
 
-# 3. Agora sim, as exceções para as pastas que você quer
-!hypr/**
-!waybar/**
-!kitty/**
-!fish/**
-!alacritty/**
-!swaylock/**
-!wlogout/**
-!wofi/**
-!mako/**
-!fastfetch/**
-!btop/**
-!micro/**
+# ── Logs de Execução ──
+*.log
 
-# 4. Exceções para arquivos na raiz da .config
-!starship.toml
-!README.md
-!.gitignore
+# ── Arquivos de Sistema Operacional ──
+.DS_Store
+Thumbs.db
 
-# Aplicativos e Cache
-discord/
-Discord/
-google-chrome/
-BraveSoftware/
-Microsoft/
+# ── Opcional: Ignorar histórico de bash local se acabar caindo aí ──
+.bash_history
+.zsh_history
