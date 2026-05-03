@@ -36,7 +36,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── Lista de arquivos/pastas do repo que NÃO vão para ~/.config ──
 # (usada tanto no backup quanto na sincronização)
-EXCLUDE_LIST=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git" "assets" "starship.toml")
+EXCLUDE_LIST=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git" "assets")
 
 # ── Verificações iniciais ────────────────────────────────────
 check_requirements() {
@@ -160,7 +160,7 @@ install_packages() {
 
     case "$DISTRO_FAMILY" in
         arch)
-            # Prefere yay > paru > pacman
+            # Prefere yay > paru; instala yay automaticamente se necessário
             if command -v yay &>/dev/null; then
                 PKG_MGR="yay"
                 PKG_CMD="yay -S --needed --noconfirm"
@@ -168,9 +168,26 @@ install_packages() {
                 PKG_MGR="paru"
                 PKG_CMD="paru -S --needed --noconfirm"
             else
-                PKG_MGR="pacman"
-                PKG_CMD="sudo pacman -S --needed --noconfirm"
-                warn "yay/paru não encontrados — usando pacman (pacotes AUR serão pulados)."
+                warn "yay/paru não encontrados — instalando paru e yay automaticamente..."
+                sudo pacman -S --needed --noconfirm base-devel git || error "Falha ao instalar base-devel/git."
+
+                # Tenta paru primeiro
+                if git clone https://aur.archlinux.org/paru.git /tmp/paru-install && \
+                   (cd /tmp/paru-install && makepkg -si --noconfirm); then
+                    rm -rf /tmp/paru-install
+                    PKG_MGR="paru"
+                    PKG_CMD="paru -S --needed --noconfirm"
+                    ok "paru instalado com sucesso."
+                else
+                    rm -rf /tmp/paru-install
+                    warn "paru falhou — tentando yay..."
+                    git clone https://aur.archlinux.org/yay.git /tmp/yay-install
+                    (cd /tmp/yay-install && makepkg -si --noconfirm) || error "Falha ao compilar yay e paru. Instale um AUR helper manualmente."
+                    rm -rf /tmp/yay-install
+                    PKG_MGR="yay"
+                    PKG_CMD="yay -S --needed --noconfirm"
+                    ok "yay instalado com sucesso."
+                fi
             fi
             info "Gerenciador: $PKG_MGR"
             $PKG_CMD "${PKGS_ARCH[@]}" || warn "Alguns pacotes falharam — verifique manualmente."
@@ -365,6 +382,7 @@ sync_dotfiles() {
         # starship.toml vai para ~/.config/starship.toml diretamente
         if [[ "$name" == "starship.toml" ]]; then
             cp -v "$item" "$HOME/.config/starship.toml"
+            ok "  Copiado: starship.toml → ~/.config/starship.toml"
             continue
         fi
 
@@ -378,6 +396,12 @@ sync_dotfiles() {
 # ── Configurações pós-instalação ─────────────────────────────
 post_install() {
     info "Aplicando configurações pós-instalação..."
+
+    # Permissões dos scripts da waybar
+    if [[ -d "$HOME/.config/waybar" ]]; then
+        find "$HOME/.config/waybar" -name "*.sh" -o -name "*.py" | xargs chmod +x 2>/dev/null || true
+        ok "Permissões dos scripts da waybar aplicadas."
+    fi
 
     # Define fish como shell padrão se não for
     if command -v fish &>/dev/null; then
