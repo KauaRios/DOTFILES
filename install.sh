@@ -438,6 +438,7 @@ post_install() {
     fi
 
     # ── Fix config.fish: guard para cachyos-fish-config ──────────────────────
+    # ── Fix config.fish: guard para cachyos-fish-config ──────────────────────
     local fish_conf="$HOME/.config/fish/config.fish"
     if [[ -f "$fish_conf" ]] && grep -q "source /usr/share/cachyos-fish-config" "$fish_conf"; then
         # Envolve o source em if/end para não quebrar em Arch puro
@@ -449,12 +450,9 @@ out = []
 for line in lines:
     stripped = line.rstrip()
     if stripped == "source /usr/share/cachyos-fish-config/cachyos-config.fish":
-        out.append("if test -f /usr/share/cachyos-fish-config/cachyos-config.fish
-")
-        out.append("    source /usr/share/cachyos-fish-config/cachyos-config.fish
-")
-        out.append("end
-")
+        out.append("if test -f /usr/share/cachyos-fish-config/cachyos-config.fish\n")
+        out.append("    source /usr/share/cachyos-fish-config/cachyos-config.fish\n")
+        out.append("end\n")
     else:
         out.append(line)
 # Adiciona fallback de fastfetch se não tiver fish_greeting
