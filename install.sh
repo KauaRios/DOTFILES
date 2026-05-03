@@ -95,9 +95,14 @@ PKGS_ARCH=(
     waybar wofi mako wlogout
     kitty alacritty fish starship fastfetch
     pipewire wireplumber pavucontrol brightnessctl
-    playerctl ttf-fira-sans otf-font-awesome
-    btop rofi hyprshot grim slurp wl-clipboard
-    ttf-jetbrains-mono-nerd cantarell-fonts
+    playerctl btop rofi hyprshot grim slurp wl-clipboard
+    # Fontes usadas nos configs
+    ttf-jetbrains-mono-nerd   # kitty.conf
+    cantarell-fonts            # hyprlock.conf
+    ttf-fira-sans              # waybar/style.css
+    otf-font-awesome           # waybar/style.css
+    ttf-hack-nerd              # wofi/style.css
+    ttf-sarasa-gothic          # mako/config (AUR)
 )
 
 # Pacotes Fedora (nomes dnf)
@@ -107,9 +112,14 @@ PKGS_FEDORA=(
     waybar wofi mako wlogout
     kitty alacritty fish
     pipewire wireplumber pavucontrol brightnessctl
-    playerctl fira-sans-fonts fontawesome-fonts
-    btop rofi grim slurp wl-clipboard
-    jetbrains-mono-fonts-all google-cantarell-fonts
+    playerctl btop rofi grim slurp wl-clipboard
+    # Fontes
+    jetbrains-mono-fonts-all   # kitty.conf
+    google-cantarell-fonts     # hyprlock.conf
+    fira-sans-fonts            # waybar/style.css
+    fontawesome-fonts          # waybar/style.css
+    hack-fonts                 # wofi/style.css
+    # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
 )
 
 # Pacotes openSUSE Tumbleweed
@@ -119,8 +129,14 @@ PKGS_OPENSUSE=(
     waybar wofi mako wlogout
     kitty alacritty fish
     pipewire wireplumber pavucontrol brightnessctl
-    playerctl google-fira-fonts
-    btop rofi grim slurp wl-clipboard
+    playerctl btop rofi grim slurp wl-clipboard
+    # Fontes
+    jetbrains-mono-fonts       # kitty.conf
+    google-cantarell-fonts     # hyprlock.conf
+    google-fira-fonts          # waybar/style.css
+    fontawesome-fonts          # waybar/style.css
+    hack-fonts                 # wofi/style.css
+    # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
 )
 
 # Pacotes Debian/Ubuntu (via apt — muitos via backports ou PPAs)
@@ -129,9 +145,14 @@ PKGS_DEBIAN=(
     waybar wofi mako-notifier
     kitty alacritty fish
     pipewire wireplumber pavucontrol brightnessctl
-    playerctl fonts-firacode
-    btop rofi grim slurp wl-clipboard
-    fonts-jetbrains-mono fonts-cantarell
+    playerctl btop rofi grim slurp wl-clipboard
+    # Fontes
+    fonts-jetbrains-mono       # kitty.conf
+    fonts-cantarell            # hyprlock.conf
+    fonts-firacode             # waybar/style.css (fira)
+    fonts-font-awesome         # waybar/style.css
+    fonts-hack                 # wofi/style.css
+    # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
 )
 
 install_packages() {
@@ -173,6 +194,8 @@ install_packages() {
             if ! command -v fastfetch &>/dev/null; then
                 _install_fastfetch "rpm"
             fi
+            # Sarasa Gothic (mako) — não está nos repos do Fedora
+            _install_sarasa_gothic
             ;;
 
         opensuse)
@@ -191,6 +214,8 @@ install_packages() {
             if ! command -v fastfetch &>/dev/null; then
                 _install_fastfetch "rpm"
             fi
+            # Sarasa Gothic (mako) — não está nos repos do openSUSE
+            _install_sarasa_gothic
             ;;
 
         debian)
@@ -203,6 +228,8 @@ install_packages() {
             if ! command -v fastfetch &>/dev/null; then
                 _install_fastfetch "deb"
             fi
+            # Sarasa Gothic (mako) — não está nos repos do Debian/Ubuntu
+            _install_sarasa_gothic
             warn "Hyprland, hyprlock e wlogout no Debian/Ubuntu requerem instalação manual ou PPA externo."
             warn "Veja: https://github.com/hyprwm/Hyprland"
             ;;
@@ -240,6 +267,51 @@ _install_fastfetch() {
             "https://github.com/fastfetch-cli/fastfetch/releases/download/${latest_ver}/fastfetch-linux-amd64.deb" && \
         sudo dpkg -i /tmp/fastfetch.deb || warn "Fastfetch falhou."
     fi
+}
+
+# ── Instala Sarasa Gothic (fonte do mako) nas distros sem repo ──
+# Arch instala via AUR (ttf-sarasa-gothic), as demais baixam do GitHub
+_install_sarasa_gothic() {
+    if fc-list 2>/dev/null | grep -qi "sarasa"; then
+        info "Sarasa Gothic já instalada, pulando."
+        return
+    fi
+
+    info "Buscando versão mais recente da Sarasa Gothic..."
+    local ver
+    ver="$(curl -s "https://api.github.com/repos/be5invis/Sarasa-Gothic/releases/latest" \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"v\([^"]*\)".*/\1/')" || true
+
+    if [[ -z "$ver" ]]; then
+        warn "Não foi possível obter versão da Sarasa Gothic. Instale manualmente."
+        warn "https://github.com/be5invis/Sarasa-Gothic/releases"
+        return
+    fi
+
+    info "Instalando Sarasa Gothic ${ver} (fonte usada no mako)..."
+    local url="https://github.com/be5invis/Sarasa-Gothic/releases/download/v${ver}/Sarasa-TrueType-${ver}.7z"
+    local tmpdir
+    tmpdir="$(mktemp -d)"
+
+    # Precisa de p7zip para extrair
+    if ! command -v 7z &>/dev/null && ! command -v 7za &>/dev/null; then
+        warn "p7zip não encontrado — tentando instalar..."
+        case "$DISTRO_FAMILY" in
+            fedora)   sudo dnf install -y p7zip p7zip-plugins || true ;;
+            opensuse) sudo zypper install -y p7zip || true ;;
+            debian)   sudo apt-get install -y p7zip-full || true ;;
+        esac
+    fi
+
+    curl -sLo "$tmpdir/sarasa.7z" "$url" && \
+    (7z x "$tmpdir/sarasa.7z" -o"$tmpdir/sarasa" -y 2>/dev/null || \
+     7za x "$tmpdir/sarasa.7z" -o"$tmpdir/sarasa" -y 2>/dev/null) && \
+    sudo mkdir -p /usr/local/share/fonts/sarasa-gothic && \
+    sudo cp "$tmpdir"/sarasa/SarasaUISC-*.ttf /usr/local/share/fonts/sarasa-gothic/ 2>/dev/null && \
+    sudo fc-cache -f && \
+    ok "Sarasa Gothic instalada." || warn "Sarasa Gothic falhou. Instale manualmente."
+
+    rm -rf "$tmpdir"
 }
 
 # ── Backup de configs existentes ─────────────────────────────
@@ -350,21 +422,13 @@ post_install() {
     warn "═══════════════════════════════════════════════════"
     warn "  ATENÇÃO — Itens que precisam de configuração manual:"
     warn "═══════════════════════════════════════════════════"
-    warn "  1. Scripts de screenshot do Waybar não incluídos:"
-    warn "     Crie ~/.config/hypr/scripts/screenshot_full"
-    warn "     Crie ~/.config/hypr/scripts/screenshot_area"
-    warn "     (usando grim + slurp, por exemplo)"
-    warn "  2. waybar/modules/mail.py depende de 'mailsecrets.py'"
-    warn "     (módulo com username/password/server do seu e-mail)"
-    warn "     Crie ~/.config/waybar/modules/mailsecrets.py"
-    warn "  3. kitty.conf usa 'JetBrainsMono Nerd Font' — instale com:"
-    warn "     paru -S ttf-jetbrains-mono-nerd  (Arch)"
-    warn "  4. hyprlock.conf usa fonte 'Cantarell Regular'"
-    warn "     paru -S cantarell-fonts  (Arch)"
-    warn "  5. mako usa fonte 'Sarasa UI SC' — instale com:"
-    warn "     paru -S ttf-sarasa-gothic  (Arch/AUR)"
-    warn "  6. fish/config.fish carrega /usr/share/cachyos-fish-config/"
-    warn "     (só existe no CachyOS — remova a linha se usar outra distro)"
+    warn "  1. waybar/modules/mail.py depende de 'mailsecrets.py'"
+    warn "     Crie ~/.config/waybar/modules/mailsecrets.py com:"
+    warn "       username = 'seu@email.com'"
+    warn "       password = 'sua_senha_ou_app_password'"
+    warn "       server   = 'imap.seuservidor.com'"
+    warn "  2. fish/config.fish só carrega cachyos-fish-config no CachyOS"
+    warn "     (nas outras distros a linha é ignorada automaticamente)"
     warn "═══════════════════════════════════════════════════"
 }
 
