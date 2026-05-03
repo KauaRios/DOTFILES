@@ -14,3 +14,14 @@ pipewire
 wireplumber
 brightnessctl
 pavucontrol
+playerctl
+btop
+rofi
+grim
+slurp
+wl-clipboard
+ttf-jetbrains-mono-nerd
+cantarell-fonts
+ttf-sarasa-gothic
+ttf-fira-sans
+otf-font-awesome

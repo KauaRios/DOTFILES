@@ -1,9 +1,25 @@
 #!/usr/bin/python
 
+# ─────────────────────────────────────────────────────────────────
+# ATENÇÃO: este módulo depende de um arquivo mailsecrets.py que
+# NÃO está incluído no repositório por razões de segurança.
+# Crie o arquivo em ~/.config/waybar/modules/mailsecrets.py com:
+#
+#   username = "seu@email.com"
+#   password = "sua_senha_ou_app_password"
+#   server   = "imap.seuservidor.com"
+#
+# Sem esse arquivo, este módulo silenciosamente não exibe nada.
+# ─────────────────────────────────────────────────────────────────
+
 import os
 import imaplib
+import sys
 
-import mailsecrets
+try:
+    import mailsecrets
+except ImportError:
+    sys.exit(1)
 
 def getmails(username, password, server):
     imap = imaplib.IMAP4_SSL(server, 993)

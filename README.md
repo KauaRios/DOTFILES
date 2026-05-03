@@ -28,8 +28,9 @@
 | ✏️ **Editor** | [Micro](https://micro-editor.github.io/) / VS Code |
 | 🔔 **Notificações** | [Mako](https://github.com/emersion/mako) |
 | 🎨 **Tema** | Catppuccin Mocha / Dark Anime |
-| 🔒 **Tela de Bloqueio** | [Swaylock](https://github.com/swaywm/swaylock) |
+| 🔒 **Tela de Bloqueio** | [Hyprlock](https://github.com/hyprwm/hyprlock) |
 | 🚀 **Launcher** | [Wofi](https://hg.sr.ht/~scoopta/wofi) |
+| 📊 **Monitor do sistema** | [btop](https://github.com/aristocratos/btop) |
 
 ---
 
@@ -37,17 +38,21 @@
 
 ```
 ~/.config/
-├── hypr/          # Configurações do Hyprland + Hyprpaper
+├── hypr/          # Configurações do Hyprland + Hyprpaper + Hyprlock
+│   └── scripts/   # screenshot_full e screenshot_area (grim + slurp)
 ├── waybar/        # Barra de status personalizada
+│   └── modules/   # weather.sh, spotify.sh, storage.sh, mail.py
 ├── wofi/          # Launcher de aplicativos
 ├── mako/          # Notificações do sistema
-├── swaylock/      # Tela de bloqueio
+├── swaylock/      # Tela de bloqueio (swaylock)
 ├── wlogout/       # Menu de logout
 ├── kitty/         # Terminal Kitty
 ├── alacritty/     # Terminal Alacritty
 ├── fish/          # Configurações do shell Fish
 ├── fastfetch/     # Info do sistema com arte ASCII
-└── micro/         # Editor de texto Micro
+├── btop/          # Monitor de sistema
+├── micro/         # Editor de texto Micro
+└── wallpapers/    # Wallpapers (usado pelo hyprpaper)
 ```
 
 ---
@@ -60,8 +65,12 @@ Todos os pacotes necessários estão no arquivo [`requirements.txt`](requirement
 hyprland  hyprlock  hyprpaper  waybar     wofi
 mako      wlogout   kitty      alacritty  fish
 starship  fastfetch pipewire   wireplumber
-brightnessctl  pavucontrol
+brightnessctl  pavucontrol  playerctl
+btop      rofi      grim       slurp      wl-clipboard
+ttf-jetbrains-mono-nerd  cantarell-fonts  ttf-sarasa-gothic
 ```
+
+> **Nota:** `waybar/modules/mail.py` requer um arquivo `mailsecrets.py` local (não incluso) com suas credenciais IMAP. Veja o cabeçalho do arquivo para instruções.
 
 ---
 
@@ -88,7 +97,10 @@ cd DOTFILES
 cp -r hypr waybar wofi mako swaylock wlogout kitty alacritty fish fastfetch micro ~/.config/
 
 # Ou copiar individualmente — exemplo para o Waybar:
-cp -r waybar ~/.config/waybar
+cp -r waybar ~/.config/
+
+# starship.toml vai diretamente para ~/.config/
+cp starship.toml ~/.config/
 ```
 
 > ⚠️ **Atenção:** Faça backup das suas configurações atuais antes de copiar.  

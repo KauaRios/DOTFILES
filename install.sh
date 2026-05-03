@@ -22,7 +22,21 @@ warn()    { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 error()   { echo -e "${RED}[ERRO]${NC}  $*" >&2; exit 1; }
 ask()     { echo -e "${BOLD}$*${NC}"; }
 
+# Lê uma resposta do usuário de forma segura (trata EOF/Ctrl+D)
+safe_read() {
+    local var_name="$1"
+    local default="${2:-}"
+    if ! IFS= read -r "$var_name" 2>/dev/null; then
+        # EOF (Ctrl+D): usa o valor padrão
+        printf -v "$var_name" '%s' "$default"
+    fi
+}
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ── Lista de arquivos/pastas do repo que NÃO vão para ~/.config ──
+# (usada tanto no backup quanto na sincronização)
+EXCLUDE_LIST=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git" "assets" "starship.toml")
 
 # ── Verificações iniciais ────────────────────────────────────
 check_requirements() {
@@ -37,7 +51,8 @@ check_requirements() {
     if [[ "$XDG_SESSION_TYPE" != "wayland" ]] && [[ -z "${WAYLAND_DISPLAY:-}" ]]; then
         warn "Sessão Wayland não detectada. Este setup é otimizado para Hyprland/Wayland."
         ask "Continuar mesmo assim? [s/N]"
-        read -r resp
+        local resp
+        safe_read resp "n"
         [[ "$resp" =~ ^[Ss]$ ]] || { info "Instalação cancelada."; exit 0; }
     fi
 
@@ -81,36 +96,43 @@ PKGS_ARCH=(
     kitty alacritty fish starship fastfetch
     pipewire wireplumber pavucontrol brightnessctl
     playerctl ttf-fira-sans otf-font-awesome
+    btop rofi hyprshot grim slurp wl-clipboard
+    ttf-jetbrains-mono-nerd cantarell-fonts
 )
 
 # Pacotes Fedora (nomes dnf)
+# hyprlock e wlogout são instalados via COPR solopasha/hyprland
 PKGS_FEDORA=(
-    hyprland hyprpaper
-    waybar wofi mako
+    hyprland hyprlock hyprpaper
+    waybar wofi mako wlogout
     kitty alacritty fish
     pipewire wireplumber pavucontrol brightnessctl
     playerctl fira-sans-fonts fontawesome-fonts
+    btop rofi grim slurp wl-clipboard
+    jetbrains-mono-fonts-all google-cantarell-fonts
 )
-# Nota: hyprlock, wlogout, starship, fastfetch podem precisar de
-# copr ou build manual no Fedora
 
 # Pacotes openSUSE Tumbleweed
+# hyprlock disponível em security:privacy, wlogout em home:Dead_Mozay
 PKGS_OPENSUSE=(
-    hyprland hyprpaper
-    waybar wofi mako
+    hyprland hyprlock hyprpaper
+    waybar wofi mako wlogout
     kitty alacritty fish
     pipewire wireplumber pavucontrol brightnessctl
     playerctl google-fira-fonts
+    btop rofi grim slurp wl-clipboard
 )
 
 # Pacotes Debian/Ubuntu (via apt — muitos via backports ou PPAs)
+# Nota: hyprland, hyprlock e wlogout no Debian requerem build manual ou PPA externo
 PKGS_DEBIAN=(
     waybar wofi mako-notifier
     kitty alacritty fish
     pipewire wireplumber pavucontrol brightnessctl
     playerctl fonts-firacode
+    btop rofi grim slurp wl-clipboard
+    fonts-jetbrains-mono fonts-cantarell
 )
-# Nota: hyprland no Debian requer build manual ou PPA externo
 
 install_packages() {
     info "Iniciando instalação de pacotes para família: $DISTRO_FAMILY"
@@ -135,11 +157,11 @@ install_packages() {
 
         fedora)
             info "Instalando via dnf..."
-            # Habilita copr do solopasha para hyprland
+            # Habilita copr do solopasha — contém hyprland, hyprlock e wlogout
             if ! sudo dnf copr list --enabled 2>/dev/null | grep -q "solopasha/hyprland"; then
                 info "Habilitando COPR solopasha/hyprland..."
                 sudo dnf copr enable -y solopasha/hyprland 2>/dev/null || \
-                    warn "Não foi possível habilitar o COPR. Hyprland pode não ser instalado."
+                    warn "Não foi possível habilitar o COPR. Hyprland, hyprlock e wlogout podem não ser instalados."
             fi
             sudo dnf install -y "${PKGS_FEDORA[@]}" || warn "Alguns pacotes falharam."
             # Starship via script oficial
@@ -147,21 +169,27 @@ install_packages() {
                 info "Instalando Starship..."
                 curl -sS https://starship.rs/install.sh | sh -s -- -y || warn "Starship falhou."
             fi
-            # Fastfetch via download direto
+            # Fastfetch: busca versão mais recente dinamicamente
             if ! command -v fastfetch &>/dev/null; then
-                info "Instalando Fastfetch..."
-                FASTFETCH_VER="2.11.4"
-                curl -sLo /tmp/fastfetch.rpm \
-                    "https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VER}/fastfetch-linux-amd64.rpm" && \
-                sudo rpm -i /tmp/fastfetch.rpm || warn "Fastfetch falhou."
+                _install_fastfetch "rpm"
             fi
             ;;
 
         opensuse)
             info "Instalando via zypper..."
+            # Adiciona repositórios OBS para hyprlock e wlogout se necessário
+            if ! zypper repos 2>/dev/null | grep -qi "security:privacy"; then
+                info "Adicionando repo OBS security:privacy (hyprlock)..."
+                sudo zypper addrepo -f \
+                    "https://download.opensuse.org/repositories/security:privacy/openSUSE_Tumbleweed/" \
+                    security-privacy 2>/dev/null || warn "Não foi possível adicionar repo do hyprlock."
+            fi
             sudo zypper install -y "${PKGS_OPENSUSE[@]}" || warn "Alguns pacotes falharam."
             if ! command -v starship &>/dev/null; then
                 curl -sS https://starship.rs/install.sh | sh -s -- -y || warn "Starship falhou."
+            fi
+            if ! command -v fastfetch &>/dev/null; then
+                _install_fastfetch "rpm"
             fi
             ;;
 
@@ -173,12 +201,9 @@ install_packages() {
                 curl -sS https://starship.rs/install.sh | sh -s -- -y || warn "Starship falhou."
             fi
             if ! command -v fastfetch &>/dev/null; then
-                FASTFETCH_VER="2.11.4"
-                curl -sLo /tmp/fastfetch.deb \
-                    "https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VER}/fastfetch-linux-amd64.deb" && \
-                sudo dpkg -i /tmp/fastfetch.deb || warn "Fastfetch falhou."
+                _install_fastfetch "deb"
             fi
-            warn "Hyprland no Debian/Ubuntu requer instalação manual ou PPA externo."
+            warn "Hyprland, hyprlock e wlogout no Debian/Ubuntu requerem instalação manual ou PPA externo."
             warn "Veja: https://github.com/hyprwm/Hyprland"
             ;;
 
@@ -191,21 +216,44 @@ install_packages() {
     ok "Pacotes processados."
 }
 
+# ── Instala fastfetch buscando a versão mais recente ────────
+_install_fastfetch() {
+    local pkg_type="$1"   # "rpm" ou "deb"
+    info "Buscando versão mais recente do fastfetch..."
+
+    local latest_ver
+    latest_ver="$(curl -s "https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest" \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')" || true
+
+    if [[ -z "$latest_ver" ]]; then
+        warn "Não foi possível obter a versão mais recente do fastfetch via API. Pulando."
+        return
+    fi
+
+    info "Instalando fastfetch ${latest_ver}..."
+    if [[ "$pkg_type" == "rpm" ]]; then
+        curl -sLo /tmp/fastfetch.rpm \
+            "https://github.com/fastfetch-cli/fastfetch/releases/download/${latest_ver}/fastfetch-linux-amd64.rpm" && \
+        sudo rpm -i /tmp/fastfetch.rpm || warn "Fastfetch falhou."
+    else
+        curl -sLo /tmp/fastfetch.deb \
+            "https://github.com/fastfetch-cli/fastfetch/releases/download/${latest_ver}/fastfetch-linux-amd64.deb" && \
+        sudo dpkg -i /tmp/fastfetch.deb || warn "Fastfetch falhou."
+    fi
+}
+
 # ── Backup de configs existentes ─────────────────────────────
 backup_existing() {
     local backup_dir="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
     local has_backup=false
 
-    # Arquivos/pastas do repo que vão para ~/.config
-    local exclude=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git" "starship.toml")
-
     for item in "$REPO_DIR"/*; do
         local name
         name="$(basename "$item")"
 
-        # Pula exclusões
+        # Pula exclusões definidas em EXCLUDE_LIST
         local skip=false
-        for ex in "${exclude[@]}"; do
+        for ex in "${EXCLUDE_LIST[@]}"; do
             [[ "$name" == "$ex" ]] && skip=true && break
         done
         $skip && continue
@@ -229,17 +277,15 @@ backup_existing() {
 sync_dotfiles() {
     info "Sincronizando dotfiles para ~/.config/..."
 
-    local exclude=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git")
-
     mkdir -p "$HOME/.config"
 
     for item in "$REPO_DIR"/*; do
         local name
         name="$(basename "$item")"
 
-        # Pula exclusões
+        # Pula exclusões definidas em EXCLUDE_LIST
         local skip=false
-        for ex in "${exclude[@]}"; do
+        for ex in "${EXCLUDE_LIST[@]}"; do
             [[ "$name" == "$ex" ]] && skip=true && break
         done
         $skip && continue
@@ -284,13 +330,42 @@ post_install() {
         info "Reiniciando Waybar..."
         pkill waybar || true
         sleep 0.5
-        waybar &>/dev/null & disown
+        waybar 2>/tmp/waybar-install.log & disown
+        sleep 1
+        if ! pgrep -x waybar &>/dev/null; then
+            warn "Waybar não iniciou. Verifique erros em /tmp/waybar-install.log"
+        fi
     elif command -v waybar &>/dev/null; then
         info "Iniciando Waybar..."
-        waybar &>/dev/null & disown
+        waybar 2>/tmp/waybar-install.log & disown
+        sleep 1
+        if ! pgrep -x waybar &>/dev/null; then
+            warn "Waybar não iniciou. Verifique erros em /tmp/waybar-install.log"
+        fi
     fi
 
     ok "Pós-instalação concluída."
+
+    echo ""
+    warn "═══════════════════════════════════════════════════"
+    warn "  ATENÇÃO — Itens que precisam de configuração manual:"
+    warn "═══════════════════════════════════════════════════"
+    warn "  1. Scripts de screenshot do Waybar não incluídos:"
+    warn "     Crie ~/.config/hypr/scripts/screenshot_full"
+    warn "     Crie ~/.config/hypr/scripts/screenshot_area"
+    warn "     (usando grim + slurp, por exemplo)"
+    warn "  2. waybar/modules/mail.py depende de 'mailsecrets.py'"
+    warn "     (módulo com username/password/server do seu e-mail)"
+    warn "     Crie ~/.config/waybar/modules/mailsecrets.py"
+    warn "  3. kitty.conf usa 'JetBrainsMono Nerd Font' — instale com:"
+    warn "     paru -S ttf-jetbrains-mono-nerd  (Arch)"
+    warn "  4. hyprlock.conf usa fonte 'Cantarell Regular'"
+    warn "     paru -S cantarell-fonts  (Arch)"
+    warn "  5. mako usa fonte 'Sarasa UI SC' — instale com:"
+    warn "     paru -S ttf-sarasa-gothic  (Arch/AUR)"
+    warn "  6. fish/config.fish carrega /usr/share/cachyos-fish-config/"
+    warn "     (só existe no CachyOS — remova a linha se usar outra distro)"
+    warn "═══════════════════════════════════════════════════"
 }
 
 # ── Confirmação do usuário ───────────────────────────────────
@@ -307,7 +382,8 @@ confirm() {
     warn "Configs existentes serão copiados para backup antes de sobrescrever."
     echo ""
     ask "Iniciar instalação? [s/N]"
-    read -r resp
+    local resp
+    safe_read resp "n"
     [[ "$resp" =~ ^[Ss]$ ]] || { info "Instalação cancelada."; exit 0; }
 }
 
