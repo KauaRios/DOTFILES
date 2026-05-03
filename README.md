@@ -3,7 +3,7 @@
 # 🌌 dotfiles
 
 
-**AINDA EM TESTES AMBIENTE FUNCIONAL PADRAO(Cachy OS) tambem funciona no ArchLinux Padrao Com Ajustes**
+**TESTADO ARCHLINUX E CACHYOS TOTALMENTE FUNCIONAL**
 
 **Setup pessoal do Hyprland rodando no CachyOS** 
 *Simples, funcional e agradável aos olhos.*
