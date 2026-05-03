@@ -3,7 +3,7 @@
 # 🌌 dotfiles
 
 
-**TESTADO ARCHLINUX E CACHYOS TOTALMENTE FUNCIONAL**
+**TESTADO EM ARCHLINUX E CACHYOS TOTALMENTE FUNCIONAL**
 
 **Setup pessoal do Hyprland rodando no CachyOS** 
 *Simples, funcional e agradável aos olhos.*
