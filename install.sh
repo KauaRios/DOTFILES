@@ -125,9 +125,9 @@ PKGS_FEDORA=(
     fira-sans-fonts            # waybar/style.css
     fontawesome-fonts          # waybar/style.css
     hack-fonts                 # wofi/style.css
-    ImageMagick gnome-themes-extra nwg-look qt5ct qt6ct xsettingsd
+    # GTK/Qt/Tema escuro
+    ImageMagick gnome-themes-extra nwg-look qt5ct qt6ct kvantum xsettingsd
     # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
-
 )
 
 # Pacotes openSUSE Tumbleweed
@@ -144,7 +144,8 @@ PKGS_OPENSUSE=(
     google-fira-fonts          # waybar/style.css
     fontawesome-fonts          # waybar/style.css
     hack-fonts                 # wofi/style.css
-    ImageMagick gnome-themes-extra nwg-look qt5ct qt6ct xsettingsd
+    # GTK/Qt/Tema escuro (nomes openSUSE diferem do Arch!)
+    ImageMagick gnome-themes-extras nwg-look qt5ct qt6ct kvantum-manager xsettingsd
     # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
 )
 
@@ -161,7 +162,9 @@ PKGS_DEBIAN=(
     fonts-firacode             # waybar/style.css (fira)
     fonts-font-awesome         # waybar/style.css
     fonts-hack                 # wofi/style.css
-    imagemagick gnome-themes-extra nwg-look qt5ct qt6ct xsettingsd
+    # GTK/Qt/Tema escuro (nomes Debian diferem do Arch!)
+    imagemagick gnome-themes-extra qt5ct qt6ct qt5-style-kvantum xsettingsd
+    # nwg-look não disponível no apt — instalado via _install_nwg_look abaixo
     # Sarasa Gothic (mako): instalada via _install_sarasa_gothic abaixo
 )
 
@@ -254,6 +257,8 @@ install_packages() {
             fi
             # Sarasa Gothic (mako) — não está nos repos do Debian/Ubuntu
             _install_sarasa_gothic
+            # nwg-look não está no apt — instalar binário do GitHub
+            _install_nwg_look
             warn "Hyprland, hyprlock e wlogout no Debian/Ubuntu requerem instalação manual ou PPA externo."
             warn "Veja: https://github.com/hyprwm/Hyprland"
             ;;
@@ -336,6 +341,27 @@ _install_sarasa_gothic() {
     ok "Sarasa Gothic instalada." || warn "Sarasa Gothic falhou. Instale manualmente."
 
     rm -rf "$tmpdir"
+}
+
+# ── Instala nwg-look no Debian (não está no apt) ─────────────
+_install_nwg_look() {
+    if command -v nwg-look &>/dev/null; then
+        info "nwg-look já instalado, pulando."
+        return
+    fi
+    info "Buscando versão mais recente do nwg-look..."
+    local ver
+    ver="$(curl -s "https://api.github.com/repos/nwg-piotr/nwg-look/releases/latest" \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"v\([^"]*\)".*/\1/')" || true
+    if [[ -z "$ver" ]]; then
+        warn "Não foi possível obter versão do nwg-look. Instale manualmente."
+        warn "https://github.com/nwg-piotr/nwg-look/releases"
+        return
+    fi
+    info "Instalando nwg-look ${ver}..."
+    curl -sLo /tmp/nwg-look.deb \
+        "https://github.com/nwg-piotr/nwg-look/releases/download/v${ver}/nwg-look_${ver}_amd64.deb" && \
+    sudo dpkg -i /tmp/nwg-look.deb || warn "nwg-look falhou. Instale manualmente."
 }
 
 # ── Backup de configs existentes ─────────────────────────────
