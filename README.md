@@ -2,7 +2,8 @@
 
 # 🌌 dotfiles
 
-**Setup pessoal do Hyprland rodando no CachyOS**  
+**Setup pessoal do Hyprland rodando no CachyOS** 
+**AINDA EM TESTES AMBIENTE FUNCIONAL PADRAO(Cachy OS) tambem funciona no ArchLinux Padrao Com Ajustes**
 *Simples, funcional e agradável aos olhos.*
 
 ![Preview](assets/AREA.png)
