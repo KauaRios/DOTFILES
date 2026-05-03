@@ -170,7 +170,6 @@ install_packages() {
             else
                 warn "yay/paru não encontrados — instalando paru automaticamente..."
                 sudo pacman -S --needed --noconfirm base-devel git || error "Falha ao instalar base-devel/git."
-                # Tenta paru primeiro (Rust, mais rápido de compilar)
                 if git clone https://aur.archlinux.org/paru.git /tmp/paru-install && \
                    (cd /tmp/paru-install && makepkg -si --noconfirm); then
                     rm -rf /tmp/paru-install
@@ -396,56 +395,27 @@ sync_dotfiles() {
 post_install() {
     info "Aplicando configurações pós-instalação..."
 
-    # ── Fix hyprpaper.conf: substituir ~ por caminho absoluto real ──────────
-    # O hyprpaper não expande ~ corretamente no Arch puro
+    # ── Expande HOMEPATH no hyprpaper.conf para caminho absoluto real ────────
     local hyprpaper_conf="$HOME/.config/hypr/hyprpaper.conf"
     if [[ -f "$hyprpaper_conf" ]]; then
-        sed -i "s|~|$HOME|g" "$hyprpaper_conf"
+        sed -i "s|HOMEPATH|$HOME|g" "$hyprpaper_conf"
         ok "hyprpaper.conf: caminhos expandidos para $HOME"
     fi
 
-    # ── Fix config.fish: cachyos-fish-config não existe no Arch puro ────────
-    local fish_conf="$HOME/.config/fish/config.fish"
-    if [[ -f "$fish_conf" ]]; then
-        # Envolve o source do cachyos em um guard para não quebrar em Arch puro
-        if grep -q "source /usr/share/cachyos-fish-config" "$fish_conf"; then
-            sed -i \
-                's|source /usr/share/cachyos-fish-config/cachyos-config.fish|if test -f /usr/share/cachyos-fish-config/cachyos-config.fish\n    source /usr/share/cachyos-fish-config/cachyos-config.fish\nend|' \
-                "$fish_conf"
-            ok "config.fish: guard adicionado para cachyos-fish-config."
-        fi
-        # Adiciona fallback do fastfetch se não existir ainda
-        if ! grep -q "fish_greeting" "$fish_conf"; then
-            cat >> "$fish_conf" << 'FISHEOF'
-
-# Fallback: chama fastfetch no greeting em distros sem cachyos-fish-config
-function fish_greeting
-    if not test -f /usr/share/cachyos-fish-config/cachyos-config.fish
-        if command -q fastfetch
-            fastfetch
-        end
-    end
-end
-FISHEOF
-            ok "config.fish: fallback de fastfetch adicionado."
-        fi
-    fi
-
-    # ── Permissões dos scripts da waybar ────────────────────────────────────
+    # ── Permissões dos scripts da waybar ─────────────────────────────────────
     if [[ -d "$HOME/.config/waybar" ]]; then
         find "$HOME/.config/waybar" -name "*.sh" -o -name "*.py" | xargs chmod +x 2>/dev/null || true
         ok "Permissões dos scripts da waybar aplicadas."
     fi
 
-    # Define fish como shell padrão se não for
+    # ── Define fish como shell padrão ────────────────────────────────────────
     if command -v fish &>/dev/null; then
         local fish_path
         fish_path="$(command -v fish)"
         if [[ "$SHELL" != "$fish_path" ]]; then
             info "Definindo fish como shell padrão..."
-            # Garante que fish está em /etc/shells
             grep -qF "$fish_path" /etc/shells || echo "$fish_path" | sudo tee -a /etc/shells
-            chsh -s "$fish_path" || warn "Não foi possível definir fish como padrão. Rode: chsh -s $fish_path"
+            sudo chsh -s "$fish_path" "$USER" || warn "Não foi possível definir fish como padrão. Rode manualmente: sudo chsh -s $fish_path $USER"
         fi
     fi
 
