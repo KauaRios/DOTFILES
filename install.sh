@@ -491,7 +491,12 @@ PYFIX
         ok "fisher e plugins instalados."
         # fzf é necessário para o fzf.fish funcionar
         if ! command -v fzf &>/dev/null; then
-            sudo pacman -S --needed --noconfirm fzf 2>/dev/null || true
+            case "$DISTRO_FAMILY" in
+                arch)    $PKG_CMD fzf 2>/dev/null || true ;;
+                fedora)  sudo dnf install -y fzf 2>/dev/null || true ;;
+                opensuse) sudo zypper install -y fzf 2>/dev/null || true ;;
+                debian)  sudo apt-get install -y fzf 2>/dev/null || true ;;
+            esac
         fi
     fi
 
@@ -506,11 +511,13 @@ PYFIX
     if command -v fish &>/dev/null; then
         local fish_path
         fish_path="$(command -v fish)"
+        # logname retorna o usuário real mesmo quando o script roda via sudo
+        local real_user
+        real_user="$(logname 2>/dev/null || id -un)"
         if [[ "$SHELL" != "$fish_path" ]]; then
             info "Definindo fish como shell padrão..."
             grep -qF "$fish_path" /etc/shells || echo "$fish_path" | sudo tee -a /etc/shells
-            # TROCA: Saída do chsh (interativo) entrada do usermod (não-interativo)
-            sudo usermod -s "$fish_path" "$USER" || warn "Não foi possível definir fish como padrão via usermod."
+            sudo usermod -s "$fish_path" "$real_user" || warn "Não foi possível definir fish como padrão via usermod."
         fi
     fi
 
