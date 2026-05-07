@@ -1,377 +1,78 @@
-/* ============================================================
-   WAYBAR — Floating Islands Theme
-   Três ilhas flutuantes com gap visível entre elas.
-   Barra totalmente transparente — wallpaper aparece atrás.
-   Paleta: azul neon frio + âmbar brasa + fundo vidro escuro.
-   ============================================================ */
-
 * {
-    font-family: "Fira Sans", "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 12px;
+    font-family: "JetBrains Mono Nerd Font", "Fira Sans", sans-serif;
+    font-size: 11px;
     font-weight: 600;
     border: none;
     border-radius: 0;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-    transition-property: background-color, border-color, color, box-shadow;
-    transition-duration: 0.22s;
-    transition-timing-function: ease;
 }
 
-/* Fix obrigatório wiki — reseta hover GTK */
-button {
-    box-shadow: inset 0 -3px transparent;
-    border: none;
-    border-radius: 0;
-    padding: 0 5px;
-}
-
-button:hover {
-    background: inherit;
-    box-shadow: inset 0 -3px transparent;
-}
-
-/* ── Barra — 100% transparente, gaps vindos do config margin ─ */
 #waybar {
-    background: transparent;
-    color: #81d4fa;
-    border-radius: 0;
-    margin: 0;
-    padding: 0;
+    background: rgba(13, 21, 33, 0.95);
+    color: #e0e1dd;
+    border-bottom: 1px solid rgba(66, 165, 245, 0.2);
 }
-
-window#waybar.hidden {
-    opacity: 0.12;
-}
-
-/* ── Ilha esquerda: workspaces + spotify ─────────────────── */
-/* ── Ilha centro: clock + weather ───────────────────────── */
-/* ── Ilha direita: métricas + tray + power ───────────────── */
-
-/* Base de todos os módulos: transparente por padrão */
-#workspaces,
-#window,
-#clock,
-#battery,
-#cpu,
-#memory,
-#disk,
-#temperature,
-#backlight,
-#network,
-#pulseaudio,
-#wireplumber,
-#custom-media,
-#mode,
-#idle_inhibitor,
-#mpd,
-#bluetooth,
-#custom-hyprPicker,
-#custom-power-menu,
-#custom-spotify,
-#custom-weather,
-#custom-screenshot_t,
-#custom-storage,
-#custom-power,
-#custom-launcher,
-#tray {
-    background: transparent;
-    color: #81d4fa;
-    border-radius: 0;
-    padding: 0 8px;
-    margin: 0;
-    border: none;
-}
-
-/* ── As três ilhas são os grupos .modules-left/center/right ─
-   Cada grupo vira uma cápsula glassmorphism flutuante.       */
 
 .modules-left {
-    background: rgba(5, 10, 28, 0.75);
-    border: 1px solid rgba(79, 195, 247, 0.18);
-    border-radius: 20px;
-    margin: 6px 0 6px 10px;
-    padding: 0 4px;
-    box-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.40),
-        inset 0 1px 0 rgba(129, 212, 250, 0.06);
+    background: rgba(27, 38, 59, 0.8);
+    margin: 4px 0 4px 10px;
+    padding: 0 10px;
+    border-radius: 6px;
 }
 
 .modules-center {
-    background: rgba(5, 10, 28, 0.75);
-    border: 1px solid rgba(79, 195, 247, 0.22);
-    border-radius: 20px;
-    margin: 6px 0;
-    padding: 0 4px;
-    box-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.40),
-        inset 0 1px 0 rgba(129, 212, 250, 0.08);
+    background: transparent;
+    margin: 4px 0;
 }
 
 .modules-right {
-    background: rgba(5, 10, 28, 0.75);
-    border: 1px solid rgba(79, 195, 247, 0.18);
-    border-radius: 20px;
-    margin: 6px 10px 6px 0;
-    padding: 0 4px;
-    box-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.40),
-        inset 0 1px 0 rgba(129, 212, 250, 0.06);
+    margin: 4px 10px 4px 0;
+    padding: 0;
 }
 
-/* ── Workspaces ──────────────────────────────────────────── */
 #workspaces {
-    padding: 0 2px;
+    background: rgba(27, 38, 59, 0.8);
+    margin: 0;
+    padding: 0 4px;
+    border-radius: 6px;
 }
 
 #workspaces button {
-    padding: 2px 8px;
-    margin: 3px 1px;
-    border-radius: 14px;
-    color: #90b8d0;
+    padding: 0 8px;
+    color: #778da9;
     background: transparent;
-    border: none;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    box-shadow: none;
-    min-width: 18px;
+    border-radius: 4px;
+    margin: 2px;
 }
 
 #workspaces button.active {
-    color: #e1f5fe;
-    background: rgba(79, 195, 247, 0.20);
-    border: 1px solid rgba(79, 195, 247, 0.55);
-}
-
-#workspaces button:hover {
-    color: #b0d8f0;
-    background: rgba(79, 195, 247, 0.10);
-    box-shadow: none;
+    color: #ffffff;
+    background: #4cc9f0;
 }
 
 #workspaces button.urgent {
-    color: #ef5350;
-    background: rgba(239, 83, 80, 0.12);
-    border: 1px solid rgba(239, 83, 80, 0.35);
+    background: #ef476f;
+    color: #ffffff;
 }
 
-/* ── Spotify — itálico suave ─────────────────────────────── */
-#custom-spotify {
-    color: #4fc3f7;
-    font-style: italic;
-    font-size: 11px;
-    padding: 0 10px 0 6px;
+#clock, #temperature, #cpu, #memory, #disk, #wireplumber, #battery, #network {
+    padding: 0 8px;
+    color: #e0e1dd;
 }
 
-/* ── Clock — destaque na ilha central ───────────────────── */
 #clock {
-    color: #e1f5fe;
-    font-weight: 900;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    padding: 0 10px;
+    font-weight: 800;
 }
 
-/* ── Weather ─────────────────────────────────────────────── */
-#custom-weather                  { color: #81d4fa; font-size: 11px; }
-#custom-weather.severe           { color: #ef5350; }
-#custom-weather.sunnyDay         { color: #ffb300; }
-#custom-weather.clearNight       { color: #e1f5fe; }
-#custom-weather.cloudyFoggyDay,
-#custom-weather.cloudyFoggyNight { color: #546e7a; }
-#custom-weather.rainyDay,
-#custom-weather.rainyNight       { color: #26c6da; }
-#custom-weather.showyIcyDay,
-#custom-weather.snowyIcyNight    { color: #e1f5fe; }
-#custom-weather.default          { color: #81d4fa; }
-
-/* ── CPU — âmbar ─────────────────────────────────────────── */
-#cpu {
-    color: #ffb300;
-    font-size: 11px;
-}
-
-/* ── Memory ──────────────────────────────────────────────── */
-#memory {
-    color: #64b5f6;
-    font-size: 11px;
-}
-
-/* ── Storage / Disk ──────────────────────────────────────── */
-#custom-storage,
-#disk {
-    color: #4dd0e1;
-    font-size: 11px;
-}
-
-/* ── Temperature ─────────────────────────────────────────── */
-#temperature {
-    color: #ffb300;
-    font-size: 11px;
-}
-
-#temperature.critical {
-    color: #ef5350;
-    animation: blink-crit 0.6s alternate infinite;
-}
-
-/* ── Backlight ───────────────────────────────────────────── */
-#backlight {
-    color: #81d4fa;
-    font-size: 11px;
-}
-
-/* ── Audio ───────────────────────────────────────────────── */
-#wireplumber,
-#pulseaudio {
-    color: #4fc3f7;
-    font-size: 11px;
-}
-
-#pulseaudio.muted,
-#wireplumber.muted {
-    color: #263238;
-}
-
-/* ── Battery ─────────────────────────────────────────────── */
-#battery {
-    color: #81d4fa;
-    font-size: 11px;
-}
-
-#battery.charging,
-#battery.full,
-#battery.plugged {
-    color: #4fc3f7;
-}
-
-#battery.warning:not(.charging) {
-    color: #ffb300;
-}
-
-#battery.critical:not(.charging) {
-    color: #ef5350;
-    animation: blink-crit 0.5s alternate infinite;
-}
-
-@keyframes blink-crit {
-    to { color: rgba(239, 83, 80, 0.40); }
-}
-
-/* ── Network ─────────────────────────────────────────────── */
-#network {
-    color: #26c6da;
-    font-size: 11px;
-}
-
-#network.disconnected {
-    color: #263238;
-}
-
-/* ── Bluetooth ───────────────────────────────────────────── */
-#bluetooth {
-    color: #26c6da;
-    font-size: 11px;
-}
-
-#bluetooth.disconnected {
-    color: #263238;
-}
-
-/* ── Tray ────────────────────────────────────────────────── */
-#tray {
-    padding: 0 6px;
-}
-
-#tray > .passive {
-    -gtk-icon-effect: dim;
-}
-
-#tray > .needs-attention {
-    -gtk-icon-effect: highlight;
-}
-
-/* ── Idle inhibitor ──────────────────────────────────────── */
-#idle_inhibitor {
-    color: #37474f;
-}
-
-#idle_inhibitor.activated {
-    color: #4fc3f7;
-}
-
-/* ── Screenshot ──────────────────────────────────────────── */
-#custom-screenshot_t {
-    color: #37474f;
-    font-size: 11px;
-    padding: 0 6px;
-}
-
-#custom-screenshot_t:hover {
-    color: #81d4fa;
-}
-
-/* ── Power — discreto, vermelho no hover ─────────────────── */
 #custom-power {
-    color: #37474f;
-    font-size: 11px;
-    padding: 0 8px 0 4px;
+    padding: 0 12px;
+    color: #ffffff;
+    background: #ef476f;
+    border-radius: 0 6px 6px 0;
+    margin-left: 8px;
 }
 
-#custom-power:hover {
-    color: #ef5350;
-}
-
-/* ── Launcher ────────────────────────────────────────────── */
-#custom-launcher {
-    color: #4fc3f7;
-    font-size: 11px;
-    padding: 0 4px 0 8px;
-}
-
-/* ── MPD / Media ─────────────────────────────────────────── */
-#mpd {
-    color: #4fc3f7;
-    font-style: italic;
-    font-size: 11px;
-}
-
-#custom-media {
-    color: #81d4fa;
-    font-style: italic;
-    font-size: 11px;
-    min-width: 80px;
-}
-
-/* ── Window title ────────────────────────────────────────── */
-#window {
-    color: #546e7a;
-    font-size: 11px;
-    font-style: italic;
-}
-
-/* ── Language / Keyboard ─────────────────────────────────── */
-#language {
-    color: #546e7a;
-    min-width: 16px;
-    font-size: 11px;
-}
-
-#keyboard-state {
-    color: #81d4fa;
-    min-width: 16px;
-    font-size: 11px;
-}
-
-#keyboard-state > label { padding: 0; }
-
-#keyboard-state > label.locked {
-    color: #ffb300;
-}
-
-/* ── Focus ───────────────────────────────────────────────── */
-label:focus {
-    background: transparent;
+tooltip {
+    background: #0d1b2a;
+    border: 1px solid #4cc9f0;
+    border-radius: 4px;
 }
