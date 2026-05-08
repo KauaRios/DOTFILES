@@ -1,46 +1,50 @@
 * {
-    font-family: "Hack", monospace;
+    font-family: "JetBrains Mono Nerd Font", "Fira Code", monospace;
+    font-size: 14px;
 }
 
 window {
-    background-color: #00137d; /* cachydgreen */
-}
-
-#input {
-    margin: 5px;
-    border-radius: 0px;
-    border: none;
-    background-color: #111826; /* cachydgreen */
-    color: #ffffffff; /* cachywhite */
-}
-
-#inner-box {
-    background-color: #111826; /* cachydblue */
+    margin: 0px;
+    background-color: rgba(10, 10, 10, 0.9);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    border-radius: 15px;
 }
 
 #outer-box {
-    margin: 2px;
+    margin: 15px;
+}
+
+#input {
+    margin: 5px 5px 15px 5px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(25, 25, 25, 0.9);
+    color: #ffffff;
     padding: 10px;
-    background-color: #111826; /* cachydblue */
 }
 
-#scroll {
-    margin: 5px;
-}
-
-#text {
-    padding: 4px;
-    color: #ffffffff; /* cachywhite */
-}
-
-#entry:nth-child(even){
-    background-color: #182545; /* cachymblue */
+#entry {
+    margin: 2px 0px;
+    padding: 10px;
+    border-radius: 10px;
+    color: #b0b0b0;
+    transition: all 0.2s ease-in-out;
 }
 
 #entry:selected {
-    background-color: #00c3ff; /* cachymgreen */
+    background-color: rgba(255, 68, 68, 0.15);
+    border-left: 4px solid #ff4444;
+}
+
+#text {
+    margin-left: 10px;
 }
 
 #text:selected {
-    background: transparent;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+#scroll {
+    margin-top: 5px;
 }

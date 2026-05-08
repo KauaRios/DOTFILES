@@ -1,23 +1,27 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 28,
-    "margin-left": 10,
+    "height": 32,
+    "margin-top": 0,
+    "margin-left": 0,
     "margin-bottom": 0,
-    "margin-right": 10,
-    "spacing": 8,
+    "margin-right": 0,
+    "spacing": 4,
     "modules-left": [
-        "temperature",
-        "clock",
-        "cpu"
+        "hyprland/workspaces",
+        "hyprland/window"
     ],
     "modules-center": [
-        "hyprland/workspaces"
+        "clock"
     ],
     "modules-right": [
+        "cpu",
+        "memory",
+        "temperature",
         "wireplumber",
         "network",
         "battery",
+        "tray",
         "custom/power"
     ],
     "hyprland/workspaces": {
@@ -37,82 +41,59 @@
         },
         "on-scroll-up": "hyprctl dispatch workspace e+1 1>/dev/null",
         "on-scroll-down": "hyprctl dispatch workspace e-1 1>/dev/null",
-        "sort-by-number": true,
-        "active-only": false
+        "sort-by-number": true
+    },
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 35,
+        "separate-outputs": true
     },
     "clock": {
-        "format": "{:%H:%M %d/%m}",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "today-format": "<b>{}</b>"
-    },
-    "temperature": {
-        "interval": 4,
-        "format": "{icon} {temperatureC}°C",
-        "format-icons": [
-            "",
-            "",
-            ""
-        ],
-        "critical-threshold": 80
+        "format": "󰥔 {:%H:%M  󰃭 %d/%m}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
     },
     "cpu": {
-        "interval": 1,
-        "format": " {max_frequency}GHz {usage}%",
-        "max-length": 16,
-        "min-length": 16
+        "interval": 2,
+        "format": " {usage}%",
+        "max-length": 10
     },
     "memory": {
-        "interval": 30,
-        "format": " {used:0.1f}/{total:0.0f}GB"
+        "interval": 10,
+        "format": " {used:0.1f}G"
     },
-    "disk": {
-        "path": "/",
-        "format": " {free}GB",
-        "interval": 60
+    "temperature": {
+        "critical-threshold": 80,
+        "format": "{icon} {temperatureC}°C",
+        "format-icons": ["", "", ""]
     },
     "wireplumber": {
         "format": "{icon} {volume}%",
         "format-muted": "",
-        "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": [
-                "",
-                "",
-                ""
-            ]
-        }
+        "format-icons": ["", "", ""]
+    },
+    "network": {
+        "format-wifi": " {essid}",
+        "format-ethernet": "󰈀 {ifname}",
+        "format-disconnected": "󰖪",
+        "tooltip-format": "{ifname} via {gwaddr} 󰊗",
+        "tooltip-format-wifi": "{essid} ({signaldBm}dBm) ",
+        "max-length": 20
     },
     "battery": {
-        "interval": 2,
         "states": {
-            "good": 95,
             "warning": 30,
             "critical": 15
         },
         "format": "{icon} {capacity}%",
-        "format-charging": " {capacity}%",
+        "format-charging": "󱐋 {capacity}%",
         "format-plugged": " {capacity}%",
-        "format-icons": [
-            "",
-            "",
-            "",
-            "",
-            ""
-        ]
+        "format-icons": ["", "", "", "", ""]
     },
-    "network": {
-        "format-wifi": " {essid}",
-        "format-ethernet": " {ifname}",
-        "format": "",
-        "format-disconnected": " "
+    "tray": {
+        "spacing": 8
     },
     "custom/power": {
-        "format": "",
+        "format": " ⏻",
         "tooltip": false,
         "on-click": "wlogout"
     }

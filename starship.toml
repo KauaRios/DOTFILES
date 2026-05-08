@@ -1,10 +1,6 @@
-# ╔══════════════════════════════════════════════════════╗
-# ║   starship.toml — Rimuru Tempest · 転生スライム      ║
-# ║   slime king · devour everything · evolve always     ║
-# ╚══════════════════════════════════════════════════════╝
-
+# ── Layout ───────────────────────────────────────────────
 format = """
-[╭─](fg:#0e2a3a)\
+[╭─](fg:active_red)\
 $os\
 $username\
 $directory\
@@ -14,88 +10,76 @@ $python\
 $nodejs\
 $rust\
 $cmd_duration\
-[─╮](fg:#0e2a3a)
-[╰─](fg:#0e2a3a)$character\
+[─╮](fg:active_red)
+[╰─](fg:active_red)$character\
 """
 
-palette = "rimuru"
+palette = "caveirao"
 
-[palettes.rimuru]
-cyan       = "#38c8e8"
-cyan2      = "#20a0c0"
-cyan_dark  = "#1a6880"
-gold       = "#c8b858"
-gold2      = "#a89840"
-ice        = "#e8f4ff"
-ice2       = "#b8cce8"
-navy       = "#0a0e14"
-deep       = "#0e2a3a"
-teal       = "#1a3040"
+[palettes.caveirao]
+dark_bg    = "#0a0a0a"
+deep_grey  = "#1a1a1a"
+medium_grey = "#444444"
+bone_white = "#e0e0e0"
+active_red = "#ff4444"
+dark_red   = "#771111"
+beige_light = "#dcdccc"
 
 # ── OS ───────────────────────────────────────────────────
 [os]
 disabled = false
-format = "[ $symbol ](bg:deep fg:cyan)"
+format = "[ $symbol ](bg:deep_grey fg:active_red)"
 
 [os.symbols]
 Arch      = "󰣇"
-Ubuntu    = ""
-Debian    = ""
-Fedora    = ""
-NixOS     = ""
-Windows   = ""
-Macos     = ""
-Linux     = ""
+Linux     = "󰌽"
 
 # ── Username ─────────────────────────────────────────────
 [username]
 show_always = true
-format = "[  $user ](bg:navy fg:ice2)"
+format = "[  $user ](bg:dark_bg fg:bone_white)"
 
 # ── Directory ────────────────────────────────────────────
 [directory]
-format = "[ 󰉋 $path ](bg:deep fg:cyan2)"
+format = "[ 󰉋 $path ](bg:deep_grey fg:beige_light)"
 truncation_length = 3
 truncate_to_repo = true
 read_only = " 󰌾"
-read_only_style = "fg:cyan"
+read_only_style = "fg:active_red"
 
 # ── Git branch ───────────────────────────────────────────
 [git_branch]
-format = "[ $symbol$branch ](bg:navy fg:gold)"
-symbol = " "
+format = "[ $symbol$branch ](bg:dark_bg fg:medium_grey)"
+symbol = "󰊢 "
 
 # ── Git status ───────────────────────────────────────────
 [git_status]
-format = "([ $all_status$ahead_behind ](bg:navy fg:cyan))"
-conflicted = "✦"
+format = "([ $all_status$ahead_behind ](bg:dark_bg fg:active_red))"
+conflicted = "󰗖 "
 ahead      = "⇡${count}"
 behind     = "⇣${count}"
-diverged   = "⇕⇡${ahead_count}⇣${behind_count}"
-untracked  = "?"
-modified   = "~"
-staged     = "+"
-deleted    = "✗"
+untracked  = "? "
+modified   = "~ "
+staged     = "+ "
+deleted    = "✗ "
 
-# ── Python ───────────────────────────────────────────────
+# ── Languages ────────────────────────────────────────────
 [python]
-format = "[ 󰌠 $version ](bg:deep fg:ice2)"
+format = "[ 󰌠 $version ](bg:deep_grey fg:bone_white)"
 
-# ── Node ─────────────────────────────────────────────────
 [nodejs]
-format = "[ 󰎙 $version ](bg:deep fg:ice2)"
+format = "[ 󰎙 $version ](bg:deep_grey fg:bone_white)"
 
-# ── Rust ─────────────────────────────────────────────────
 [rust]
-format = "[ 󱘗 $version ](bg:deep fg:ice2)"
+format = "[ 󱘗 $version ](bg:deep_grey fg:bone_white)"
 
 # ── Tempo de execução ────────────────────────────────────
 [cmd_duration]
-format = "[ 󱦟 $duration ](fg:teal)"
+format = "[ 󱦟 $duration ](fg:medium_grey)"
 min_time = 2_000
 
 # ── Caractere do prompt ──────────────────────────────────
 [character]
-success_symbol = "[✦](bold fg:cyan)"
-error_symbol   = "[✗](bold fg:cyan2)"
-vimcmd_symbol  = "[󰕷](bold fg:gold)"
+success_symbol = "[ 󰁔](bold fg:active_red)"
+error_symbol   = "[ 󰁔](bold fg:dark_red)"
+vimcmd_symbol  = "[ 󰁔](bold fg:medium_grey)"
