@@ -1,31 +1,33 @@
 * {
     background-image: none;
     box-shadow: none;
+    font-family: "JetBrains Mono Nerd Font", "Fira Code", monospace;
+    transition: all 0.3s ease-in-out;
 }
 
 window {
-    background-color: rgba(17, 24, 38, 0.9); /* cachydblue with alpha */
+    background-color: rgba(10, 10, 10, 0.9); /* Mesma transparência do Wofi/Waybar */
 }
 
 button {
-    border-radius: 0;
-    border-color: #007d6f; /* cachydgreen */
-    text-decoration-color: #ffffff; /* cachywhite */
-    color: #ffffff; /* cachywhite */
-    background-color: #111826; /* cachydblue */
-    border-style: solid;
-    border-width: 1px;
+    color: #e0e0e0;
+    background-color: rgba(30, 30, 30, 0.5);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 15px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 25%;
 }
 
 button:focus, button:active, button:hover {
-    background-color: #00aa84; /* cachymgreen */
-    outline-style: none;
+    background-color: rgba(255, 68, 68, 0.2);
+    border: 1px solid #ff4444;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
 }
 
-/* Usando caminhos relativos para a pasta que você criou */
+/* Ícones */
 #lock {
     background-image: image(url("icons/lock.png"));
 }
