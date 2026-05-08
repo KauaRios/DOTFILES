@@ -24,7 +24,7 @@
 
 | Componente | Ferramenta |
 |---|---|
-| 🐧 **Sistema Operacional** | [CachyOS](https://cachyos.org/) (Arch-based) |
+| 🐧 **Sistema Operacional** | [CachyOS](https://cachyos.org/) / Arch Linux / Fedora / openSUSE / Debian / Ubuntu |
 | 🪟 **Window Manager** | [Hyprland](https://hyprland.org/) |
 | 🐟 **Shell** | [Fish](https://fishshell.com/) + [Starship](https://starship.rs/) |
 | 📟 **Terminal** | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Alacritty](https://alacritty.org/) |
@@ -32,8 +32,9 @@
 | 🔔 **Notificações** | [Mako](https://github.com/emersion/mako) |
 | 🎨 **Tema** | Catppuccin Mocha / Dark Anime |
 | 🔒 **Tela de Bloqueio** | [Hyprlock](https://github.com/hyprwm/hyprlock) |
-| 🚀 **Launcher** | [Wofi](https://hg.sr.ht/~scoopta/wofi) |
+| 🚀 **Launcher** | [Wofi](https://hg.sr.ht/~scoopta/wofi) / [Rofi](https://github.com/davatorium/rofi) |
 | 📊 **Monitor do sistema** | [btop](https://github.com/aristocratos/btop) |
+| 🎨 **Customização GTK/Qt** | [nwg-look](https://github.com/nwg-piotr/nwg-look), qt5ct, qt6ct |
 
 ---
 
@@ -42,44 +43,41 @@
 ```
 ~/.config/
 ├── hypr/          # Configurações do Hyprland + Hyprpaper + Hyprlock
-│   └── scripts/   # screenshot_full e screenshot_area (grim + slurp)
-├── waybar/        # Barra de status personalizada
-│   └── modules/   # weather.sh, spotify.sh, storage.sh, mail.py
-├── wofi/          # Launcher de aplicativos
+├── waybar/        # Barra de status personalizada (scripts: weather, spotify, storage, mail)
+├── wofi/          # Launcher de aplicativos (Wofi)
 ├── mako/          # Notificações do sistema
-├── swaylock/      # Tela de bloqueio (swaylock)
+├── swaylock/      # Tela de bloqueio (Swaylock)
 ├── wlogout/       # Menu de logout
 ├── kitty/         # Terminal Kitty
 ├── alacritty/     # Terminal Alacritty
-├── fish/          # Configurações do shell Fish
-├── fastfetch/     # Info do sistema com arte ASCII
+├── fish/          # Configurações do shell Fish + Fisher plugins
+├── fastfetch/     # Info do sistema com arte ASCII e presets de imagem
 ├── btop/          # Monitor de sistema
-├── micro/         # Editor de texto Micro
-└── wallpapers/    # Wallpapers (usado pelo hyprpaper)
+├── micro/         # Editor de texto Micro (com temas Catppuccin)
+├── nwg-look/      # Configurações de tema GTK
+├── wallpapers/    # Wallpapers personalizados
+└── starship.toml  # Prompt customizado
 ```
 
 ---
 
 ## 📦 Dependências
 
-Todos os pacotes necessários estão no arquivo [`requirements.txt`](requirements.txt):
+O instalador automático gerencia as dependências para as principais distribuições. Alguns dos pacotes essenciais são:
 
-```
-hyprland  hyprlock  hyprpaper  waybar     wofi
-mako      wlogout   kitty      alacritty  fish
-starship  fastfetch pipewire   wireplumber
-brightnessctl  pavucontrol  playerctl
-btop      rofi      grim       slurp      wl-clipboard
-ttf-jetbrains-mono-nerd  cantarell-fonts  ttf-sarasa-gothic
-```
-
-> **Nota:** `waybar/modules/mail.py` requer um arquivo `mailsecrets.py` local (não incluso) com suas credenciais IMAP. Veja o cabeçalho do arquivo para instruções.
+- `hyprland`, `hyprlock`, `hyprpaper`, `waybar`, `wofi`, `mako`, `wlogout`
+- `kitty`, `alacritty`, `fish`, `starship`, `fastfetch`, `btop`
+- `pipewire`, `wireplumber`, `pavucontrol`, `brightnessctl`, `playerctl`
+- `grim`, `slurp`, `wl-clipboard`, `imagemagick`
+- Fontes: `ttf-jetbrains-mono-nerd`, `cantarell-fonts`, `ttf-sarasa-gothic`
 
 ---
 
 ## 🚀 Instalação
 
-### Automática (recomendado)
+### Automática (Recomendado)
+
+O script `install.sh` agora suporta múltiplas distribuições (**Arch, CachyOS, Fedora, openSUSE, Debian e Ubuntu**). Ele realiza backup automático, instala dependências, sincroniza arquivos e configura o Fish como shell padrão.
 
 ```bash
 git clone https://github.com/KauaRios/DOTFILES.git
@@ -96,49 +94,30 @@ Clone o repositório e copie as pastas desejadas para `~/.config/`:
 git clone https://github.com/KauaRios/DOTFILES.git
 cd DOTFILES
 
-# Copiar todas as configurações de uma vez
-cp -r hypr waybar wofi mako swaylock wlogout kitty alacritty fish fastfetch micro ~/.config/
-
-# Ou copiar individualmente — exemplo para o Waybar:
-cp -r waybar ~/.config/
-
-# starship.toml vai diretamente para ~/.config/
+# Exemplo: copiar tudo (exceto arquivos de instalação)
+cp -r alacritty btop fastfetch fish gtk-3.0 gtk-4.0 hypr kitty mako micro nwg-look qt5ct qt6ct swaylock wallpapers waybar wlogout wofi xsettingsd ~/.config/
 cp starship.toml ~/.config/
 ```
 
-> ⚠️ **Atenção:** Faça backup das suas configurações atuais antes de copiar.  
-> ```bash
-> cp -r ~/.config/hypr ~/.config/hypr.bak
-> ```
+> ⚠️ **Atenção:** Sempre faça backup das suas configurações atuais antes de sobrescrever.
 
 ---
 
 ## 🎨 Temas & Estética
 
-O setup utiliza o tema **Catppuccin Mocha** como base, com toques de estética *dark anime*. Os principais componentes visuais são:
-
-- **Waybar** — barra superior com módulos de sistema, workspaces e relógio
-- **Wofi** — launcher minimalista com fundo translúcido
-- **Mako** — notificações com bordas arredondadas e cores suaves
-- **Swaylock** — tela de bloqueio com blur e overlay escuro
-- **Fastfetch** — exibição de info do sistema com arte personalizada
+O setup utiliza o tema **Catppuccin Mocha** como base, com toques de estética *dark anime*.
+- **Waybar** — Barra superior com módulos dinâmicos.
+- **Fastfetch** — Exibição de info com suporte a imagens (Miku, Sukuna, Bocchi, etc) em `fastfetch/assets`.
+- **Micro** — Editor configurado com esquemas de cores Catppuccin.
+- **Fish** — Shell turbinado com `fisher`, `autopair` e `fzf`.
 
 ---
 
-## 🔧 Pós-instalação
+## 🔧 Pós-instalação & Notas
 
-Após instalar, reinicie o Hyprland ou recarregue as configurações:
-
-```bash
-# Recarregar Hyprland
-hyprctl reload
-
-# Recarregar Waybar
-pkill waybar && waybar &
-
-# Recarregar Mako
-pkill mako && mako &
-```
+1. **Email:** `waybar/modules/mail.py` requer um arquivo `mailsecrets.py` em `~/.config/waybar/modules/` com suas credenciais.
+2. **Shell:** O instalador tentará definir o **Fish** como seu shell padrão automaticamente.
+3. **Wallpapers:** O Hyprpaper está configurado para buscar em `~/.config/wallpapers/`.
 
 ---
 
