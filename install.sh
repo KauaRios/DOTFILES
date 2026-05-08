@@ -41,7 +41,19 @@ fi
 
 # ── Lista de arquivos/pastas do repo que NÃO vão para ~/.config ──
 # (usada tanto no backup quanto na sincronização)
-EXCLUDE_LIST=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git" "assets")
+EXCLUDE_LIST=("install.sh" "requirements.txt" "README.md" ".gitignore" "LICENSE" ".git")
+
+# ── Verifica se estamos rodando de um local seguro ────────────
+check_safe_location() {
+    if [[ "$REPO_DIR" == *"/Downloads/"* ]]; then
+        warn "Você está executando este script a partir da pasta 'Downloads'."
+        warn "Isso não é recomendado, pois arquivos em Downloads podem ser apagados acidentalmente."
+        ask "Deseja continuar mesmo assim? [s/N]"
+        local resp
+        safe_read resp "n"
+        [[ "$resp" =~ ^[Ss]$ ]] || { info "Instalação cancelada."; exit 0; }
+    fi
+}
 
 # ── Verificações iniciais ────────────────────────────────────
 check_requirements() {
@@ -381,23 +393,33 @@ backup_existing() {
         $skip && continue
 
         local target="$HOME/.config/$name"
-        if [[ -e "$target" ]]; then
+        
+        # Se o alvo existir (seja arquivo, pasta ou link simbólico)
+        if [[ -e "$target" || -L "$target" ]]; then
+            # Se for um link simbólico, apenas removemos (não precisa de backup de link)
+            if [[ -L "$target" ]]; then
+                rm "$target"
+                continue
+            fi
+
             if [[ "$has_backup" == false ]]; then
                 mkdir -p "$backup_dir"
                 has_backup=true
                 info "Backup dos configs existentes em: $backup_dir"
             fi
-            cp -r "$target" "$backup_dir/" && \
-                info "  Backup: ~/.config/$name → $backup_dir/$name"
+            
+            # Move para o backup em vez de copiar, para limpar o caminho para o symlink
+            mv "$target" "$backup_dir/" && \
+                info "  Movido para backup: ~/.config/$name → $backup_dir/$name"
         fi
     done
 
     $has_backup && ok "Backup concluído." || info "Nenhum config existente para fazer backup."
 }
 
-# ── Sincronização dos dotfiles ───────────────────────────────
+# ── Sincronização dos dotfiles (via Links Simbólicos) ────────
 sync_dotfiles() {
-    info "Sincronizando dotfiles para ~/.config/..."
+    info "Criando links simbólicos em ~/.config/..."
 
     mkdir -p "$HOME/.config"
 
@@ -412,15 +434,10 @@ sync_dotfiles() {
         done
         $skip && continue
 
-        # starship.toml vai para ~/.config/starship.toml diretamente
-        if [[ "$name" == "starship.toml" ]]; then
-            cp -v "$item" "$HOME/.config/starship.toml"
-            ok "  Copiado: starship.toml → ~/.config/starship.toml"
-            continue
-        fi
-
-        cp -rv "$item" "$HOME/.config/"
-        ok "  Copiado: $name"
+        # Cria o link simbólico
+        # -s: simbólico, -f: força, -n: trata link para diretório como arquivo
+        ln -sfn "$item" "$HOME/.config/$name"
+        ok "  Linkado: $name → ~/.config/$name"
     done
 
     ok "Sincronização concluída."
@@ -431,15 +448,31 @@ post_install() {
     info "Aplicando configurações pós-instalação..."
 
     # ── Expande HOMEPATH no hyprpaper.conf para caminho absoluto real ────────
+    # Se for link simbólico, removemos o link e copiamos o arquivo real para poder editar sem sujar o repo
     local hyprpaper_conf="$HOME/.config/hypr/hyprpaper.conf"
+    if [[ -L "$hyprpaper_conf" ]]; then
+        info "hyprpaper.conf é um link. Convertendo para arquivo independente para edição..."
+        local source_file
+        source_file="$(readlink "$hyprpaper_conf")"
+        rm "$hyprpaper_conf"
+        cp "$source_file" "$hyprpaper_conf"
+    fi
+
     if [[ -f "$hyprpaper_conf" ]]; then
         sed -i "s|HOMEPATH|$HOME|g" "$hyprpaper_conf"
         ok "hyprpaper.conf: caminhos expandidos para $HOME"
     fi
 
     # ── Fix config.fish: guard para cachyos-fish-config ──────────────────────
-    # ── Fix config.fish: guard para cachyos-fish-config ──────────────────────
     local fish_conf="$HOME/.config/fish/config.fish"
+    if [[ -L "$fish_conf" ]]; then
+        info "config.fish é um link. Convertendo para arquivo independente para edição..."
+        local source_file
+        source_file="$(readlink "$fish_conf")"
+        rm "$fish_conf"
+        cp "$source_file" "$fish_conf"
+    fi
+
     if [[ -f "$fish_conf" ]] && grep -q "source /usr/share/cachyos-fish-config" "$fish_conf"; then
         # Envolve o source em if/end para não quebrar em Arch puro
         python3 - "$fish_conf" << 'PYFIX'
@@ -582,6 +615,7 @@ confirm() {
 # ── Main ─────────────────────────────────────────────────────
 main() {
     check_requirements
+    check_safe_location
     detect_distro
     confirm
 

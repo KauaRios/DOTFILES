@@ -86,17 +86,26 @@ chmod +x install.sh
 ./install.sh
 ```
 
-### Manual
+## 📁 Instalação Manual
 
-Clone o repositório e copie as pastas desejadas para `~/.config/`:
+Se preferir não usar o instalador automático, você pode criar links simbólicos manualmente. Isso permite que você mantenha suas configs conectadas ao repositório, facilitando atualizações futuras com `git pull`.
 
 ```bash
+# Clone o repositório
 git clone https://github.com/KauaRios/DOTFILES.git
 cd DOTFILES
 
-# Exemplo: copiar tudo (exceto arquivos de instalação)
-cp -r alacritty btop fastfetch fish gtk-3.0 gtk-4.0 hypr kitty mako micro nwg-look qt5ct qt6ct swaylock wallpapers waybar wlogout wofi xsettingsd ~/.config/
-cp starship.toml ~/.config/
+# Exemplo: criar link simbólico para uma pasta específica
+ln -s ~/dotfiles/hypr ~/.config/hypr
+
+# Dica: Para linkar tudo automaticamente (excluindo arquivos de controle):
+for dir in */; do
+    name=$(basename "$dir")
+    if [[ ! "$name" =~ ^(\.|install|LICENSE|README|requirements|assets|starship\.toml) ]]; then
+        ln -sf "$(pwd)/$name" ~/.config/"$name"
+    fi
+done
+ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
 ```
 
 > ⚠️ **Atenção:** Sempre faça backup das suas configurações atuais antes de sobrescrever.
