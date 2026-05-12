@@ -185,7 +185,8 @@ hl.config({
             disable_hyprland_logo   = false,
     },
     cursor = {
-        no_warps = false,
+        no_hardware_cursors = true,  -- resolve stuttering entre monitores de refresh diferente (144hz vs 60hz)
+no_warps = false,
     },
 })
 
