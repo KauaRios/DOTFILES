@@ -1,10 +1,6 @@
--- ============================================================
---  hyprland.lua  –  config migrado do hyprlang para Lua
---  Gerado a partir do hyprland.conf original
--- ============================================================
 
--- Você pode (e deve!) dividir em vários arquivos e usar require():
--- require("myColors")
+
+
 
 
 --------------------
@@ -60,6 +56,10 @@ hl.exec_cmd("hyprpaper")
 
 -- Notificações
 hl.exec_cmd("mako")
+hl.exec_cmd("sleep 3 & hyprctl reload")
+
+
+
 
 -- Tema GTK escuro
 hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
@@ -135,7 +135,6 @@ hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}
 hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
 hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
 hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
-
 -- Animações (mistura do original com os slides customizados)
 hl.animation({ leaf = "global",           enabled = true, speed = 10,   bezier = "default" })
 hl.animation({ leaf = "border",           enabled = true, speed = 5.39, bezier = "easeOutQuint" })
@@ -150,7 +149,7 @@ hl.animation({ leaf = "layersIn",         enabled = true, speed = 4,    bezier =
 hl.animation({ leaf = "layersOut",        enabled = true, speed = 1.5,  bezier = "linear",       style = "fade" })
 hl.animation({ leaf = "fadeLayersIn",     enabled = true, speed = 1.79, bezier = "almostLinear" })
 hl.animation({ leaf = "fadeLayersOut",    enabled = true, speed = 1.39, bezier = "almostLinear" })
--- Workspaces com slide (como no seu config original)
+-- Animações personalizadas
 hl.animation({ leaf = "workspaces",       enabled = true, speed = 4,    bezier = "easeOutQuint", style = "slide" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4,    bezier = "easeOutQuint", style = "slidevert" })
 hl.animation({ leaf = "zoomFactor",       enabled = true, speed = 7,    bezier = "quick" })
@@ -163,8 +162,7 @@ hl.animation({ leaf = "zoomFactor",       enabled = true, speed = 7,    bezier =
 hl.config({
     dwindle = {
         preserve_split = true,
-        -- pseudotile foi removido do 0.55: agora é por janela via hl.dsp.window.pseudo()
--- ou windowrule. O bind SUPER+P já ativa/desativa para a janela ativa.
+   
     },
     master = {
         new_status = "master",
@@ -197,14 +195,14 @@ no_warps = false,
 
 hl.config({
     input = {
-        kb_layout  = "br",   -- teclado brasileiro (seu config original)
+        kb_layout  = "br",   
 kb_variant = "",
 kb_model   = "",
 kb_options = "",
 kb_rules   = "",
 
 follow_mouse = 1,
-sensitivity  = 0,  -- 0 = sem modificação; ajuste depois se quiser
+sensitivity  = -0.80,  
 
 touchpad = {
     natural_scroll = false,
@@ -224,6 +222,8 @@ hl.device({
     name        = "epic-mouse-v1",
     sensitivity = -0.5,
 })
+
+
 
 
 ---------------------
@@ -305,7 +305,6 @@ for i = 1, 10 do
         name  = "fix-xwayland-drags",
         match = {
             class      = "^$",
-            title      = "^$",
             xwayland   = true,
             float      = true,
             fullscreen = false,
