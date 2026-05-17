@@ -3,12 +3,12 @@
 ---------------------
 local terminal    = "kitty"
 local fileManager = "dolphin"
-local menu        = "wofi --show drun"
-local firefox     = "firefox"
+local menu        = "rofi -show drun"
+local zen     = "zen-browser"
 
 return {
     terminal    = terminal,
     fileManager = fileManager,
     menu        = menu,
-    firefox     = firefox,
+    zen    = zen,
 }
