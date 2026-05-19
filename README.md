@@ -112,6 +112,54 @@ ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
 
 ---
 
+## ⌨️ Cheat Sheet de Atalhos
+
+Existe um script Lua em `hypr/scripts/cheat_sheet.lua` que exibe todos os atalhos do Hyprland no terminal. Basta executar:
+
+```bash
+lua ~/.config/hypr/scripts/cheat_sheet.lua
+```
+
+Ou use o atalho `SUPER + H` para abrir diretamente.
+
+### Atalhos Principais
+
+| Tecla | Ação |
+|---|---|
+| `SUPER + Q` | Abrir Terminal |
+| `SUPER + C` | Fechar Janela Focada |
+| `SUPER + M` | Sair do Hyprland |
+| `SUPER + V` | Janela Flutuante (Toggle) |
+| `SUPER + P` | Layout Pseudo-Tiling |
+| `SUPER + J` | Alternar Divisão (Split) |
+| `SUPER + SHIFT + SPACE` | Tela Cheia (Fullscreen) |
+| `SUPER + SHIFT + Q` | Abrir Terminal Em Float |
+| `SUPER + E` | Gerenciador de Arquivos |
+| `SUPER + R` | Menu de Aplicativos (Rofi) |
+| `SUPER + B` | Navegador Zen |
+| `SUPER + H` | Menu de Ajuda (Cheat Sheet) |
+| `SUPER + T` | Script Sweeper Rofi |
+| `SUPER + W` | Listar Janelas Abertas |
+| `SUPER + L` | Reiniciar Waybar |
+| `SUPER + I` | Captura de Tela (Clipboard) |
+| `SUPER + SHIFT + P` | Reiniciar Hyprpaper |
+| `SUPER + Setas` | Mudar Foco (Esq/Dir/Cima/Baixo) |
+| `SUPER + 1..0` | Ir para Workspace 1 ao 10 |
+| `SUPER + SHIFT + 1..0` | Mover Janela p/ Workspace 1 ao 10 |
+| `SUPER + S` | Abrir/Fechar Scratchpad |
+| `SUPER + SHIFT + S` | Mover Janela p/ Scratchpad |
+| `SUPER + ALT + S` | Trazer Janela do Scratchpad |
+| `SUPER + Mouse Esq.` | Mover Janela (Arrastar) |
+| `SUPER + Mouse Dir.` | Redimensionar Janela |
+| `SUPER + Scroll` | Alternar Workspaces (Prox/Ant) |
+| `Fn + Vol Up/Down` | Aumentar/Diminuir Volume |
+| `Fn + Mute` | Mutar Áudio |
+| `Fn + Mic Mute` | Mutar Microfone |
+| `Fn + Brilho Up/Down` | Aumentar/Diminuir Brilho |
+| `Fn + Mídia` | Tocar/Pausar/Avançar/Voltar Mídia |
+
+---
+
 ## 🎨 Temas & Estética
 
 O setup utiliza o tema **Catppuccin Mocha** como base, com toques de estética *dark anime*.
