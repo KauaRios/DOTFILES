@@ -49,6 +49,9 @@ hl.config({
 
         touchpad = {
             natural_scroll = false,
+            --desabilita cursor Ao digitar
+            disable_while_typing = true,
+
         },
     },
 })
@@ -62,6 +65,6 @@ hl.gesture({
 
 -- Config por dispositivo
 hl.device({
-    name        = "epic-mouse-v1",
-    sensitivity = -0.5,
+    name        = "elan050a:00-04f3:31b1-touchpad",
+    sensitivity = -0.30,
 })
