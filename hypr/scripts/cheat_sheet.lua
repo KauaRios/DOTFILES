@@ -6,7 +6,7 @@ local branco  = "\27[37m"
 local negrito = "\27[1m"
 local reset   = "\27[0m" 
 
--- Base de dados completa com todos os seus comandos do keybinds.lua
+-- Base de dados completa com todos os meus comandos do keybinds.lua
 local atalhos = {
     -- Sistema e Janelas
     { tecla = "SUPER + Q",             acao = "Abrir Terminal" },
