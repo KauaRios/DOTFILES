@@ -13,7 +13,7 @@ hl.monitor({
 -- Monitor HDMI (1440x900) na direita
 hl.monitor({
     output   = "HDMI-A-1",
-    mode     = "1440x900@59.89",
+    mode     = "1920x1080@144",
     position = "1921x0", -- workaround bug 0.55: +1px libera cursor pro 2o monitor
     scale    = 1,
 })
