@@ -4,11 +4,11 @@
 local terminal    = "kitty"
 local fileManager = "dolphin"
 local menu        = "rofi -show drun"
-local zen     = "zen-browser"
+local firefox     = "firefox"
 
 return {
     terminal    = terminal,
     fileManager = fileManager,
     menu        = menu,
-    zen    = zen,
+    firefox    = firefox,
 }
